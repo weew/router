@@ -1,0 +1,27 @@
+{
+    "name": "weew/php-router",
+    "description": "Simple router.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Maxim Kott",
+            "email": "maximkott@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    },
+    "require": {
+        "weew/php-http": "0.*",
+        "weew/php-helpers-array": "0.*",
+        "weew/php-foundation": "0.*",
+        "weew/php-helpers-string": "0.*",
+        "weew/php-url": "0.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.7",
+        "satooshi/php-coveralls": "^0.6.1"
+    }
+}
