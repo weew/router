@@ -5,6 +5,7 @@ namespace Tests\Weew\Router;
 use PHPUnit_Framework_TestCase;
 use Weew\Http\HttpRequestMethod;
 use Weew\Router\IRoute;
+use Weew\Router\IRouter;
 use Weew\Router\IRoutesMatcher;
 use Weew\Router\Router;
 use Weew\Router\RoutesMatcher;
@@ -58,8 +59,12 @@ class RouterTest extends PHPUnit_Framework_TestCase {
     public function test_match() {
         $router = new Router();
         $router->get('home', 'home');
-        $router->get('items/{id}', 'id');
-        $router->get('items/{id}/slug/{alias?}', 'slug');
+        $router->group(function(IRouter $route) {
+            $route->get('items/{id}', 'id');
+        });
+        $router->group(function(IRouter $router) {
+            $router->get('items/{id}/slug/{alias?}', 'slug');
+        });
 
         $this->assertNull($router->match(HttpRequestMethod::POST, new Url('home')));
         $route = $router->match(HttpRequestMethod::GET, new Url('home'));

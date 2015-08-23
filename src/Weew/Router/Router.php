@@ -7,6 +7,11 @@ use Weew\Url\IUrl;
 
 class Router implements IRouter {
     /**
+     * @var IRouter[]
+     */
+    protected $nestedRouters = [];
+
+    /**
      * @var IRoute[]
      */
     protected $routes;
@@ -44,7 +49,19 @@ class Router implements IRouter {
         $matcher = $this->getRoutesMatcher();
         $route = $matcher->match($this->getRoutes(), $method, $url);
 
-        return $route;
+        if ($route !== null) {
+            return $route;
+        } else {
+            foreach ($this->nestedRouters as $router) {
+                $route = $router->match($method, $url);
+
+                if ($route !== null) {
+                    return $route;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -125,6 +142,20 @@ class Router implements IRouter {
     }
 
     /**
+     * @param callable $callback
+     *
+     * @return $this
+     */
+    public function group(callable $callback) {
+        $router = $this->createRouter();
+        $this->addNestedRouter($router);
+
+        $callback($router);
+
+        return $this;
+    }
+
+    /**
      * @return IRoute[]
      */
     public function getRoutes() {
@@ -173,5 +204,19 @@ class Router implements IRouter {
         $this->routes[] = $route;
 
         return $this;
+    }
+
+    /**
+     * @return Router
+     */
+    protected function createRouter() {
+        return new Router([], $this->getRoutesMatcher());
+    }
+
+    /**
+     * @param IRouter $router
+     */
+    protected function addNestedRouter(IRouter $router) {
+        $this->nestedRouters[] = $router;
     }
 }
