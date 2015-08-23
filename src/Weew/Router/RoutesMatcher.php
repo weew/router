@@ -159,10 +159,8 @@ class RoutesMatcher implements IRoutesMatcher {
      * @return string
      */
     protected function createRegexPatternForRoutePath($routePath) {
-        $routePath = $this->applyCustomRegexPatternsToRoutePath($routePath);
-        $pattern = preg_replace('#\{([a-zA-Z0-9]+)\?\}#', '([^/]+)?', $routePath);
-        $pattern = preg_replace('#\{([a-zA-Z0-9]+)\}#', '([^/]+)', $pattern);
         $pattern = $this->applyCustomRegexPatternsToRoutePath($routePath);
+        $pattern = $this->applyStandardRegexPatternsToRoutePath($pattern);
         $pattern = '#' . $pattern . '#';
 
         return $pattern;
@@ -208,6 +206,13 @@ class RoutesMatcher implements IRoutesMatcher {
      *
      * @return string
      */
+    protected function applyStandardRegexPatternsToRoutePath($routePath) {
+        $pattern = preg_replace('#\{([a-zA-Z0-9_-]+)\?\}#', '([^/]+)?', $routePath);
+        $pattern = preg_replace('#\{([a-zA-Z0-9_-]+)\}#', '([^/]+)', $pattern);
+
+        return $pattern;
+    }
+
     /**
      * @param $routePath
      *

@@ -73,20 +73,22 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals([], $route->getParameters());
 
         $this->assertNull($router->match(HttpRequestMethod::GET, new Url('items')));
-        $route = $router->match(HttpRequestMethod::GET, new Url('items/foo'));
+        $route = $router->match(HttpRequestMethod::GET, new Url('items/_foo-bar'));
         $this->assertTrue($route instanceof IRoute);
         $this->assertEquals('id', $route->getValue());
-        $this->assertEquals(['id' => 'foo'], $route->getParameters());
+        $this->assertEquals(['id' => '_foo-bar'], $route->getParameters());
 
-        $route = $router->match(HttpRequestMethod::GET, new Url('items/foo/slug'));
+        $route = $router->match(HttpRequestMethod::GET, new Url('items/_foo-bar/slug'));
         $this->assertTrue($route instanceof IRoute);
         $this->assertEquals('slug', $route->getValue());
-        $this->assertEquals(['id' => 'foo', 'alias' => null], $route->getParameters());
+        $this->assertEquals(['id' => '_foo-bar', 'alias' => null], $route->getParameters());
 
-        $route = $router->match(HttpRequestMethod::GET, new Url('items/foo/slug/bar'));
+        $route = $router->match(HttpRequestMethod::GET, new Url('items/_foo-bar/slug/bar'));
         $this->assertTrue($route instanceof IRoute);
         $this->assertEquals('slug', $route->getValue());
-        $this->assertEquals(['id' => 'foo', 'alias' => 'bar'], $route->getParameters());
+        $this->assertEquals(['id' => '_foo-bar', 'alias' => 'bar'], $route->getParameters());
+    }
+
     public function test_add_pattern() {
         $router = new Router();
         $router->addPattern('id', '[a-zA-Z]+');
