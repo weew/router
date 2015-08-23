@@ -15,4 +15,15 @@ interface IRoutesMatcher {
      * @see HttpRequestMethod
      */
     function match(array $routes, $method, IUrl $url);
+
+    /**
+     * @return array
+     */
+    function getPatterns();
+
+    /**
+     * @param string $name
+     * @param string $pattern
+     */
+    function addPattern($name, $pattern);
 }

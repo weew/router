@@ -123,4 +123,37 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
             $matcher->extractRouteParameters($route, new Url('yolo/a/b/c/swag'))
         );
     }
+
+    public function test_get_patterns() {
+        $matcher = new RoutesMatcher();
+        $this->assertTrue(is_array($matcher->getPatterns()));
+    }
+
+    public function test_add_pattern() {
+        $routes = [
+            new Route(HttpRequestMethod::GET, 'foo/{id}/{slug}', 'foo')
+        ];
+        $matcher = new RoutesMatcher();
+        $this->assertNotNull(
+            $matcher->match($routes, HttpRequestMethod::GET, new Url('foo/a/b_'))
+        );
+        $matcher->addPattern('id', '[0-9]+');
+        $this->assertNull(
+            $matcher->match($routes, HttpRequestMethod::GET, new Url('foo/a/b_'))
+        );
+        $this->assertNotNull(
+            $matcher->match($routes, HttpRequestMethod::GET, new Url('foo/1/b_'))
+        );
+        $matcher->addPattern('slug', '[a-z-]+');
+        $this->assertNull(
+            $matcher->match($routes, HttpRequestMethod::GET, new Url('foo/1/b_'))
+        );
+        $this->assertNotNull(
+            $matcher->match($routes, HttpRequestMethod::GET, new Url('foo/1/b-'))
+        );
+        $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo/1/b-'));
+        $this->assertEquals(
+            ['id' => 1, 'slug' => 'b-'], $route->getParameters()
+        );
+    }
 }

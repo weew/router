@@ -156,6 +156,18 @@ class Router implements IRouter {
     }
 
     /**
+     * @param $name
+     * @param $pattern
+     *
+     * @return $this
+     */
+    public function addPattern($name, $pattern) {
+        $this->getRoutesMatcher()->addPattern($name, $pattern);
+
+        return $this;
+    }
+
+    /**
      * @return IRoute[]
      */
     public function getRoutes() {

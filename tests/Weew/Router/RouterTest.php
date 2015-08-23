@@ -87,5 +87,41 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue($route instanceof IRoute);
         $this->assertEquals('slug', $route->getValue());
         $this->assertEquals(['id' => 'foo', 'alias' => 'bar'], $route->getParameters());
+    public function test_add_pattern() {
+        $router = new Router();
+        $router->addPattern('id', '[a-zA-Z]+');
+
+        $router->get('items/{id}', 'id');
+        $router->group(function(IRouter $router) {
+            $router->get('items/{id}/slug', 'slug');
+        });
+
+        $this->assertNotNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/foo'))
+        );
+        $this->assertNotNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/foo/slug'))
+        );
+        $this->assertNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/1'))
+        );
+        $this->assertNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/1/slug'))
+        );
+
+        $router->addPattern('id', '[0-9]+');
+
+        $this->assertNotNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/1'))
+        );
+        $this->assertNotNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/1/slug'))
+        );
+        $this->assertNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/foo'))
+        );
+        $this->assertNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/foo/slug'))
+        );
     }
 }

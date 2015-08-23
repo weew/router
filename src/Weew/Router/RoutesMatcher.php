@@ -6,6 +6,15 @@ use Weew\Url\IUrl;
 
 class RoutesMatcher implements IRoutesMatcher {
     /**
+     * @var array
+     */
+    protected $patterns = [];
+
+    public function __construct() {
+        $this->addPattern('any', '.+');
+    }
+
+    /**
      * @param IRoute[] $routes
      * @param $method
      * @param IUrl $url
@@ -112,6 +121,39 @@ class RoutesMatcher implements IRoutesMatcher {
     }
 
     /**
+     * @return array
+     */
+    public function getPatterns() {
+        return $this->patterns;
+    }
+
+    /**
+     * @param string $name
+     * @param string $pattern
+     */
+    public function addPattern($name, $pattern) {
+        array_unshift(
+            $this->patterns,
+            [
+                'name' => $name,
+                'pattern' => $pattern,
+                'regexName' => '#\{' . preg_quote($name) . '\?\}#',
+                'regexPattern' => '(' . $pattern . ')?',
+            ]
+        );
+
+        array_unshift(
+            $this->patterns,
+            [
+                'name' => $name,
+                'pattern' => $pattern,
+                'regexName' => '#\{' . preg_quote($name) . '\}#',
+                'regexPattern' => '(' . $pattern . ')',
+            ]
+        );
+    }
+
+    /**
      * @param $routePath
      *
      * @return string
@@ -120,6 +162,7 @@ class RoutesMatcher implements IRoutesMatcher {
         $routePath = $this->applyCustomRegexPatternsToRoutePath($routePath);
         $pattern = preg_replace('#\{([a-zA-Z0-9]+)\?\}#', '([^/]+)?', $routePath);
         $pattern = preg_replace('#\{([a-zA-Z0-9]+)\}#', '([^/]+)', $pattern);
+        $pattern = $this->applyCustomRegexPatternsToRoutePath($routePath);
         $pattern = '#' . $pattern . '#';
 
         return $pattern;
@@ -165,9 +208,15 @@ class RoutesMatcher implements IRoutesMatcher {
      *
      * @return string
      */
+    /**
+     * @param $routePath
+     *
+     * @return string
+     */
     protected function applyCustomRegexPatternsToRoutePath($routePath) {
-        $routePath = preg_replace('#\{any\?\}#', '(.+)?', $routePath);
-        $routePath = preg_replace('#\{any\}#', '(.+)', $routePath);
+        foreach ($this->patterns as $pattern) {
+            $routePath = preg_replace([$pattern['regexName']], $pattern['regexPattern'], $routePath);
+        }
 
         return $routePath;
     }

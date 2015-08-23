@@ -69,6 +69,14 @@ interface IRouter {
     function group(callable $callback);
 
     /**
+     * @param $name
+     * @param $pattern
+     *
+     * @return IRouter
+     */
+    function addPattern($name, $pattern);
+
+    /**
      * @param $method
      * @param $url
      *
