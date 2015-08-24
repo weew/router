@@ -22,6 +22,11 @@ class Router implements IRouter {
     protected $matcher;
 
     /**
+     * @var string
+     */
+    protected $basePath;
+
+    /**
      * @param IRoute[] $routes
      * @param IRoutesMatcher $matcher
      */
@@ -147,8 +152,7 @@ class Router implements IRouter {
      * @return $this
      */
     public function group(callable $callback) {
-        $router = $this->createRouter();
-        $router->setRoutesMatcher(clone $router->getRoutesMatcher());
+        $router = $this->createNestedRouter();
         $this->addNestedRouter($router);
 
         $this->invokeCallable($callback, $router);
@@ -164,6 +168,17 @@ class Router implements IRouter {
      */
     public function addPattern($name, $pattern) {
         $this->getRoutesMatcher()->addPattern($name, $pattern);
+
+        return $this;
+    }
+
+    /**
+     * @param $basePath
+     *
+     * @return $this
+     */
+    public function setBasePath($basePath) {
+        $this->basePath = $basePath;
 
         return $this;
     }
@@ -287,6 +302,10 @@ class Router implements IRouter {
      * @throws Exception
      */
     protected function createRoute($method, $path, $abstract) {
+        if ($this->basePath !== null) {
+            $path = url($this->basePath, $path);
+        }
+
         $route = new Route($method, $path, $abstract);
 
         $this->routes[] = $route;
@@ -299,6 +318,17 @@ class Router implements IRouter {
      */
     protected function createRouter() {
         return new Router([], $this->getRoutesMatcher());
+    }
+
+    /**
+     * @return Router
+     */
+    protected function createNestedRouter() {
+        $router = $this->createRouter();
+        $router->setBasePath($this->basePath);
+        $router->setRoutesMatcher(clone $router->getRoutesMatcher());
+
+        return $router;
     }
 
     /**

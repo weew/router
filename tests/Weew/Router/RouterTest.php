@@ -187,4 +187,21 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $router->restrictHost(['w.x.y.z']);
         $this->assertNotNull($router->match(HttpRequestMethod::GET, $url1));
     }
+
+    public function test_set_base_path() {
+        $router = new Router();
+        $router->setBasePath('api/v1');
+        $router->get('users', 'users');
+        $router->group(function(IRouter $router) {
+            $router->get('posts', 'posts');
+        });
+
+        $route = $router->match(HttpRequestMethod::GET, new Url('api/v1/users'));
+        $this->assertTrue($route instanceof IRoute);
+        $this->assertEquals('users', $route->getValue());
+
+        $route = $router->match(HttpRequestMethod::GET, new Url('api/v1/posts'));
+        $this->assertTrue($route instanceof IRoute);
+        $this->assertEquals('posts', $route->getValue());
+    }
 }

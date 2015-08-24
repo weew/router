@@ -77,6 +77,13 @@ interface IRouter {
     function addPattern($name, $pattern);
 
     /**
+     * @param $path
+     *
+     * @return IRouter
+     */
+    function setBasePath($path);
+
+    /**
      * @param $protocol
      *
      * @return IRouter
