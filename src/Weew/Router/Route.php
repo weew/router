@@ -120,7 +120,13 @@ class Route implements IRoute {
      * @return mixed
      */
     public function getParameter($key, $default = null) {
-        return array_get($this->parameters, $key, $default);
+        $parameter = array_get($this->parameters, $key, $default);
+
+        if ($parameter === null) {
+            return $default;
+        }
+
+        return $parameter;
     }
 
     /**

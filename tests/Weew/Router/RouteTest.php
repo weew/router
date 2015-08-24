@@ -47,8 +47,9 @@ class RouteTest extends PHPUnit_Framework_TestCase {
 
     public function test_get_and_set_parameters() {
         $route = new Route(HttpRequestMethod::GET, '/', 'foo');
-        $route->setParameters(['foo' => 'bar']);
+        $route->setParameters(['foo' => 'bar', 'baz' => null]);
         $this->assertEquals('bar', $route->getParameter('foo'));
+        $this->assertEquals('bar', $route->getParameter('baz', 'bar'));
         $this->assertEquals('swag', $route->getParameter('yolo', 'swag'));
         $route->setParameter('yolo', 'swag');
         $this->assertEquals('swag', $route->getParameter('yolo'));
