@@ -46,4 +46,18 @@ interface IRoute extends IArrayable {
      * @param array $parameters
      */
     function setParameters(array $parameters);
+
+    /**
+     * @param $key
+     * @param null $default
+     *
+     * @return mixed
+     */
+    function getParameter($key, $default = null);
+
+    /**
+     * @param $key
+     * @param $value
+     */
+    function setParameter($key, $value);
 }

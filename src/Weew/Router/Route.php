@@ -24,7 +24,7 @@ class Route implements IRoute {
     /**
      * @var array
      */
-    protected $parameters;
+    protected $parameters = [];
 
     /**
      * @param $method
@@ -36,8 +36,6 @@ class Route implements IRoute {
      * @see HttpRequestMethod
      */
     public function __construct($method, $path, $value) {
-        $this->parameters = [];
-
         $this->setMethod($method);
         $this->setPath($path);
         $this->setValue($value);
@@ -113,6 +111,24 @@ class Route implements IRoute {
      */
     public function setParameters(array $parameters) {
         $this->parameters = $parameters;
+    }
+
+    /**
+     * @param $key
+     * @param null $default
+     *
+     * @return mixed
+     */
+    public function getParameter($key, $default = null) {
+        return array_get($this->parameters, $key, $default);
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     */
+    public function setParameter($key, $value) {
+        array_set($this->parameters, $key, $value);
     }
 
     /**
