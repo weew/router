@@ -116,14 +116,75 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $this->assertNotNull(
             $router->match(HttpRequestMethod::GET, new Url('items/1'))
         );
+        $this->assertNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/1/slug'))
+        );
+        $this->assertNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/foo'))
+        );
+        $this->assertNotNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/foo/slug'))
+        );
+
+        $router->group(function(IRouter $router) {
+            $router->addPattern('id', '[0-9]+');
+            $router->get('items/{id}/slug', 'slug');
+        });
+
+        $this->assertNotNull(
+            $router->match(HttpRequestMethod::GET, new Url('items/1'))
+        );
         $this->assertNotNull(
             $router->match(HttpRequestMethod::GET, new Url('items/1/slug'))
         );
         $this->assertNull(
             $router->match(HttpRequestMethod::GET, new Url('items/foo'))
         );
-        $this->assertNull(
+        $this->assertNotNull(
             $router->match(HttpRequestMethod::GET, new Url('items/foo/slug'))
         );
+    }
+
+    public function test_with_restrictions() {
+        $router = new Router();
+        $url1 = new Url('https://w.x.y.z/foo');
+        $url2 = new Url('http://a.b.c.d/foo');
+
+        $router->restrictProtocol('https');
+
+        $router->group(function(IRouter $router) {
+            $router->restrictProtocol('http');
+            $router->get('foo', 'baz');
+        });
+
+        $router->get('foo', 'bar');
+
+        $route = $router->match(HttpRequestMethod::GET, $url1);
+        $this->assertNotNull($route);
+        $this->assertEquals('bar', $route->getValue());
+
+        $route = $router->match(HttpRequestMethod::GET, $url2);
+        $this->assertNotNull($route);
+        $this->assertEquals('baz', $route->getValue());
+
+        $router->restrictTLD('y');
+        $this->assertNull($router->match(HttpRequestMethod::GET, $url1));
+        $router->restrictTLD(['z']);
+        $this->assertNotNull($router->match(HttpRequestMethod::GET, $url1));
+
+        $router->restrictSubdomain('a');
+        $this->assertNull($router->match(HttpRequestMethod::GET, $url1));
+        $router->restrictSubdomain(['w.x']);
+        $this->assertNotNull($router->match(HttpRequestMethod::GET, $url1));
+
+        $router->restrictDomain('foo');
+        $this->assertNull($router->match(HttpRequestMethod::GET, $url1));
+        $router->restrictDomain(['y']);
+        $this->assertNotNull($router->match(HttpRequestMethod::GET, $url1));
+
+        $router->restrictHost('foo');
+        $this->assertNull($router->match(HttpRequestMethod::GET, $url1));
+        $router->restrictHost(['w.x.y.z']);
+        $this->assertNotNull($router->match(HttpRequestMethod::GET, $url1));
     }
 }

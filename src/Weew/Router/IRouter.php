@@ -77,6 +77,41 @@ interface IRouter {
     function addPattern($name, $pattern);
 
     /**
+     * @param $protocol
+     *
+     * @return IRouter
+     */
+    function restrictProtocol($protocol);
+
+    /**
+     * @param $tld
+     *
+     * @return IRouter
+     */
+    function restrictTLD($tld);
+
+    /**
+     * @param $domain
+     *
+     * @return IRouter
+     */
+    function restrictDomain($domain);
+
+    /**
+     * @param $subdomain
+     *
+     * @return IRouter
+     */
+    function restrictSubdomain($subdomain);
+
+    /**
+     * @param $host
+     *
+     * @return IRouter
+     */
+    function restrictHost($host);
+
+    /**
      * @param $method
      * @param $url
      *

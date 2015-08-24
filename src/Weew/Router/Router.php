@@ -147,7 +147,8 @@ class Router implements IRouter {
      * @return $this
      */
     public function group(callable $callback) {
-        $router = clone $this;
+        $router = $this->createRouter();
+        $router->setRoutesMatcher(clone $router->getRoutesMatcher());
         $this->addNestedRouter($router);
 
         $this->invokeCallable($callback, $router);
@@ -163,6 +164,81 @@ class Router implements IRouter {
      */
     public function addPattern($name, $pattern) {
         $this->getRoutesMatcher()->addPattern($name, $pattern);
+
+        return $this;
+    }
+
+    /**
+     * @param $protocol
+     *
+     * @return $this
+     */
+    public function restrictProtocol($protocol) {
+        if ( ! is_array($protocol)) {
+            $protocol = [$protocol];
+        }
+
+        $this->getRoutesMatcher()->setProtocols($protocol);
+
+        return $this;
+    }
+
+    /**
+     * @param $tld
+     *
+     * @return $this
+     */
+    public function restrictTLD($tld) {
+        if ( ! is_array($tld)) {
+            $tld = [$tld];
+        }
+
+        $this->getRoutesMatcher()->setTLDs($tld);
+
+        return $this;
+    }
+
+    /**
+     * @param $domain
+     *
+     * @return $this
+     */
+    public function restrictDomain($domain) {
+        if ( ! is_array($domain)) {
+            $domain = [$domain];
+        }
+
+        $this->getRoutesMatcher()->setDomains($domain);
+
+        return $this;
+    }
+
+    /**
+     * @param $subdomain
+     *
+     * @return $this
+     */
+    public function restrictSubdomain($subdomain) {
+        if ( ! is_array($subdomain)) {
+            $subdomain = [$subdomain];
+        }
+
+        $this->getRoutesMatcher()->setSubdomains($subdomain);
+
+        return $this;
+    }
+
+    /**
+     * @param $host
+     *
+     * @return $this
+     */
+    public function restrictHost($host) {
+        if ( ! is_array($host)) {
+            $host = [$host];
+        }
+
+        $this->getRoutesMatcher()->setHosts($host);
 
         return $this;
     }

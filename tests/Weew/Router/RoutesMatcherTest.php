@@ -127,6 +127,8 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
     public function test_get_patterns() {
         $matcher = new RoutesMatcher();
         $this->assertTrue(is_array($matcher->getPatterns()));
+        $matcher->setPatterns(['foo']);
+        $this->assertEquals(['foo'], $matcher->getPatterns());
     }
 
     public function test_add_pattern() {
@@ -155,5 +157,102 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(
             ['id' => 1, 'slug' => 'b-'], $route->getParameters()
         );
+    }
+
+    public function test_compare_url_to_protocol() {
+        $matcher = new RoutesMatcher();
+        $url = new Url('https://foo.bar');
+        $this->assertTrue($matcher->compareUrlToProtocols($url, []));
+        $this->assertTrue($matcher->compareUrlToProtocols($url, ['https']));
+        $this->assertFalse($matcher->compareUrlToProtocols($url, ['http']));
+    }
+
+    public function test_compare_url_to_tld() {
+        $matcher = new RoutesMatcher();
+        $url = new Url('https://foo.bar');
+        $this->assertTrue($matcher->compareUrlToTLDs($url, []));
+        $this->assertTrue($matcher->compareUrlToTLDs($url, ['bar']));
+        $this->assertFalse($matcher->compareUrlToTLDs($url, ['foo']));
+    }
+
+    public function test_compare_url_to_domain() {
+        $matcher = new RoutesMatcher();
+        $url = new Url('https://foo.bar');
+        $this->assertTrue($matcher->compareUrlToDomains($url, []));
+        $this->assertTrue($matcher->compareUrlToDomains($url, ['foo']));
+        $this->assertFalse($matcher->compareUrlToDomains($url, ['bar']));
+    }
+
+    public function test_compare_url_to_subdomain() {
+        $matcher = new RoutesMatcher();
+        $url = new Url('https://yolo.foo.bar');
+        $this->assertTrue($matcher->compareUrlToSubdomains($url, []));
+        $this->assertTrue($matcher->compareUrlToSubdomains($url, ['yolo']));
+        $this->assertFalse($matcher->compareUrlToSubdomains($url, ['bar']));
+    }
+
+    public function test_compare_url_to_host() {
+        $matcher = new RoutesMatcher();
+        $url = new Url('https://yolo.foo.bar');
+        $this->assertTrue($matcher->compareUrlToHosts($url, []));
+        $this->assertTrue($matcher->compareUrlToHosts($url, ['yolo.foo.bar']));
+        $this->assertFalse($matcher->compareUrlToHosts($url, ['foo.bar']));
+    }
+
+    public function test_get_and_set_additional_filters() {
+        $matcher = new RoutesMatcher();
+
+        $this->assertEquals([], $matcher->getProtocols());
+        $matcher->setProtocols(['https']);
+        $this->assertEquals(['https'], $matcher->getProtocols());
+
+        $this->assertEquals([], $matcher->getTLDs());
+        $matcher->setTLDs(['com']);
+        $this->assertEquals(['com'], $matcher->getTlds());
+
+        $this->assertEquals([], $matcher->getDomains());
+        $matcher->setDomains(['foo']);
+        $this->assertEquals(['foo'], $matcher->getDomains());
+
+        $this->assertEquals([], $matcher->getSubdomains());
+        $matcher->setSubdomains(['bar']);
+        $this->assertEquals(['bar'], $matcher->getSubdomains());
+
+        $this->assertEquals([], $matcher->getHosts());
+        $matcher->setHosts(['baz']);
+        $this->assertEquals(['baz'], $matcher->getHosts());
+    }
+
+    public function test_match_advanced_routes() {
+        $matcher = new RoutesMatcher();
+        $url = new Url('http://foo.bar.baz/foo');
+        $route = new Route(HttpRequestMethod::GET, '/foo', 'foo');
+
+        $this->assertNotNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+
+        $matcher->setProtocols(['https']);
+        $this->assertNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+        $matcher->setProtocols(['http']);
+        $this->assertNotNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+
+        $matcher->setTLDs(['bar']);
+        $this->assertNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+        $matcher->setTLDs(['baz']);
+        $this->assertNotNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+
+        $matcher->setDomains(['baz']);
+        $this->assertNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+        $matcher->setDomains(['bar']);
+        $this->assertNotNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+
+        $matcher->setSubdomains(['bar']);
+        $this->assertNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+        $matcher->setSubdomains(['foo']);
+        $this->assertNotNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+
+        $matcher->setHosts(['foo.bar']);
+        $this->assertNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+        $matcher->setHosts(['foo.bar.baz']);
+        $this->assertNotNull($matcher->match([$route], HttpRequestMethod::GET, $url));
     }
 }
