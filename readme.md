@@ -16,6 +16,9 @@
 [HTTP Layer](https://github.com/weew/php-http): offers response and request objects,
 handles cookies, headers and much more.
 
+[HTTP Blueprint](https://github.com/weew/php-http-blueprint): spin up a server,
+return some content, shutdown the server.
+
 ## Introduction
 
 What the router basically does is matching a URL to a list of registered
