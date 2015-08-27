@@ -17,7 +17,7 @@
 handles cookies, headers and much more.
 
 [HTTP Blueprint](https://github.com/weew/php-http-blueprint): spin up a server,
-return some content, shutdown the server.
+serve some content, shutdown the server.
 
 ## Introduction
 
