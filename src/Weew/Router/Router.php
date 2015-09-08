@@ -169,8 +169,43 @@ class Router implements IRouter {
         return $this;
     }
 
+    /**
+     * @param $name
+     * @param callable $callable
+     *
+     * @return $this
+     */
     public function addFilter($name, callable $callable) {
+        $this->getRoutesMatcher()->addFilter($name, $callable);
 
+        return $this;
+    }
+
+    /**
+     * @param $name
+     *
+     * @return $this
+     */
+    public function enableFilter($name) {
+        if ( ! is_array($name)) {
+            $name = [$name];
+        }
+
+        $this->getRoutesMatcher()->enableFilters($name);
+
+        return $this;
+    }
+
+    /**
+     * @param $name
+     * @param callable $resolver
+     *
+     * @return $this
+     */
+    public function addResolver($name, callable $resolver) {
+        $this->getRoutesMatcher()->addResolver($name, $resolver);
+
+        return $this;
     }
 
     /**

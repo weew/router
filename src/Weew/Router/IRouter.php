@@ -77,6 +77,29 @@ interface IRouter {
     function addPattern($name, $pattern);
 
     /**
+     * @param $name
+     * @param callable $callable
+     *
+     * @return IRouter
+     */
+    function addFilter($name, callable $callable);
+
+    /**
+     * @param $name
+     *
+     * @return IRouter
+     */
+    function enableFilter($name);
+
+    /**
+     * @param $name
+     * @param callable $resolver
+     *
+     * @return IRouter
+     */
+    function addResolver($name, callable $resolver);
+
+    /**
      * @param $path
      *
      * @return IRouter

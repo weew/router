@@ -3,6 +3,7 @@
 namespace Tests\Weew\Router;
 
 use PHPUnit_Framework_TestCase;
+use stdClass;
 use Weew\Http\HttpRequestMethod;
 use Weew\Router\IRoute;
 use Weew\Router\IRouter;
@@ -201,5 +202,37 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $route = $router->match(HttpRequestMethod::GET, new Url('api/v1/posts'));
         $this->assertTrue($route instanceof IRoute);
         $this->assertEquals('posts', $route->getValue());
+    }
+
+    public function test_with_filters() {
+        $router = new Router();
+        $router->get('users', 'users');
+        $router->addFilter('foo', function() {
+            return true;
+        });
+        $router->enableFilter('foo');
+        $route = $router->match(HttpRequestMethod::GET, new Url('users'));
+        $this->assertNotNull($route);
+
+        $router->addFilter('bar', function() {
+            return false;
+        });
+        $router->enableFilter(['bar']);
+        $route = $router->match(HttpRequestMethod::GET, new Url('users'));
+        $this->assertNull($route);
+    }
+
+    public function test_with_resolvers() {
+        $router = new Router();
+        $router->get('users/{user}/{name?}', 'users');
+        $router->addResolver('user', function($parameter) {
+            return new stdClass();
+        });
+
+        $route = $router->match(HttpRequestMethod::GET, new Url('users/22/foo'));
+
+        $this->assertNotNull($route);
+        $this->assertTrue($route->getParameter('user') instanceof stdClass);
+        $this->assertEquals('foo', $route->getParameter('name'));
     }
 }

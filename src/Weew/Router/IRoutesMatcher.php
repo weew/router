@@ -35,6 +35,43 @@ interface IRoutesMatcher {
     /**
      * @return array
      */
+    function getFilters();
+
+    /**
+     * @param array $filters
+     */
+    function setFilters(array $filters);
+
+    /**
+     * @param $name
+     * @param callable $filter
+     */
+    function addFilter($name, callable $filter);
+
+    /**
+     * @param $names
+     */
+    function enableFilters(array $names);
+
+    /**
+     * @return array
+     */
+    function getResolvers();
+
+    /**
+     * @param array $resolvers
+     */
+    function setResolvers(array $resolvers);
+
+    /**
+     * @param $name
+     * @param callable $resolver
+     */
+    function addResolver($name, callable $resolver);
+
+    /**
+     * @return array
+     */
     function getProtocols();
 
     /**
@@ -81,4 +118,24 @@ interface IRoutesMatcher {
      * @param array $hosts
      */
     function setHosts(array $hosts);
+
+    /**
+     * @return IFilterInvoker
+     */
+    function getFilterInvoker();
+
+    /**
+     * @param IFilterInvoker $filterInvoker
+     */
+    function setFilterInvoker(IFilterInvoker $filterInvoker);
+
+    /**
+     * @return IParameterResolverInvoker
+     */
+    function getParameterResolverInvoker();
+
+    /**
+     * @param IParameterResolverInvoker $parameterResolverInvoker
+     */
+    function setParameterResolverInvoker(IParameterResolverInvoker $parameterResolverInvoker);
 }

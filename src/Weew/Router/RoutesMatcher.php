@@ -2,6 +2,7 @@
 
 namespace Weew\Router;
 
+use Weew\Router\Exceptions\FilterNotFoundException;
 use Weew\Url\IUrl;
 
 class RoutesMatcher implements IRoutesMatcher {
@@ -35,8 +36,46 @@ class RoutesMatcher implements IRoutesMatcher {
      */
     protected $patterns = [];
 
-    public function __construct() {
-        $this->addPattern('any', '.+');
+    /**
+     * @var array
+     */
+    protected $filters = [];
+
+    /**
+     * @var array
+     */
+    protected $parameterResolvers = [];
+
+    /**
+     * @var IFilterInvoker
+     */
+    protected $filterInvoker;
+
+    /**
+     * @var IParameterResolverInvoker
+     */
+    protected $parameterResolverInvoker;
+
+    /**
+     * @param IFilterInvoker|null $filterInvoker
+     * @param IParameterResolverInvoker|null $parameterResolverInvoker
+     */
+    public function __construct(
+        IFilterInvoker $filterInvoker = null,
+        IParameterResolverInvoker $parameterResolverInvoker = null
+    ) {
+        if ( ! $filterInvoker instanceof IFilterInvoker) {
+            $filterInvoker = $this->createFilterInvoker();
+        }
+
+        if ( ! $parameterResolverInvoker instanceof IParameterResolverInvoker) {
+            $parameterResolverInvoker = $this->createParameterResolverInvoker();
+        }
+
+        $this->setFilterInvoker($filterInvoker);
+        $this->setParameterResolverInvoker($parameterResolverInvoker);
+
+        $this->addDefaultPatterns();
     }
 
     /**
@@ -49,6 +88,10 @@ class RoutesMatcher implements IRoutesMatcher {
      * @see HttpRequestMethod
      */
     public function match(array $routes, $method, IUrl $url) {
+        if ( ! $this->applyFilters()) {
+            return null;
+        }
+
         foreach ($routes as $route) {
             if ( ! $this->compareUrlToProtocols($url, $this->getProtocols()) ||
                 ! $this->compareUrlToHosts($url, $this->getHosts()) ||
@@ -61,8 +104,11 @@ class RoutesMatcher implements IRoutesMatcher {
                 continue;
             }
 
-            $parameters = $this->extractRouteParameters($route, $url);
-            $route->setParameters($parameters);
+            $route->setParameters(
+                $this->extractRouteParameters($route, $url)
+            );
+
+            $this->applyParameterResolvers($route);
 
             return $route;
         }
@@ -108,6 +154,73 @@ class RoutesMatcher implements IRoutesMatcher {
                 'regexPattern' => '(' . $pattern . ')',
             ]
         );
+    }
+
+    /**
+     * @return array
+     */
+    public function getFilters() {
+        return $this->filters;
+    }
+
+    /**
+     * @param array $filters
+     */
+    public function setFilters(array $filters) {
+        $this->filters = $filters;
+    }
+
+    /**
+     * @param $name
+     * @param callable $filter
+     */
+    public function addFilter($name, callable $filter) {
+        $this->filters[$name] = [
+            'filter' => $filter,
+            'enabled' => false,
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getResolvers() {
+        return $this->parameterResolvers;
+    }
+
+    /**
+     * @param array $resolvers
+     */
+    public function setResolvers(array $resolvers) {
+        $this->parameterResolvers = $resolvers;
+    }
+
+    /**
+     * @param $name
+     * @param callable $resolver
+     */
+    public function addResolver($name, callable $resolver) {
+        $this->parameterResolvers[$name] = $resolver;
+    }
+
+    /**
+     * @param array $names
+     *
+     * @throws FilterNotFoundException
+     */
+    public function enableFilters(array $names) {
+        foreach ($names as $name) {
+            $filter = array_get($this->filters, $name);
+
+            if ($filter === null) {
+                throw new FilterNotFoundException(
+                    s('Filter with name %s not found.', $name)
+                );
+            }
+
+            $filter['enabled'] = true;
+            $this->filters[$name] = $filter;
+        }
     }
 
     /**
@@ -178,6 +291,36 @@ class RoutesMatcher implements IRoutesMatcher {
      */
     public function setHosts(array $hosts) {
         $this->hosts = $hosts;
+    }
+
+    /**
+     * @return IFilterInvoker
+     */
+    public function getFilterInvoker() {
+        return $this->filterInvoker;
+    }
+
+    /**
+     * @param IFilterInvoker $filterInvoker
+     */
+    public function setFilterInvoker(IFilterInvoker $filterInvoker) {
+        $this->filterInvoker = $filterInvoker;
+    }
+
+    /**
+     * @return IParameterResolverInvoker
+     */
+    public function getParameterResolverInvoker() {
+        return $this->parameterResolverInvoker;
+    }
+
+    /**
+     * @param IParameterResolverInvoker $parameterResolverInvoker
+     */
+    public function setParameterResolverInvoker(
+        IParameterResolverInvoker $parameterResolverInvoker
+    ) {
+        $this->parameterResolverInvoker = $parameterResolverInvoker;
     }
 
     /**
@@ -330,6 +473,10 @@ class RoutesMatcher implements IRoutesMatcher {
         return $values;
     }
 
+    protected function addDefaultPatterns() {
+        $this->addPattern('any', '.+');
+    }
+
     /**
      * @param $routePath
      *
@@ -426,5 +573,55 @@ class RoutesMatcher implements IRoutesMatcher {
         }
 
         return $values;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function applyFilters() {
+        foreach ($this->filters as $filter) {
+
+            if ($filter['enabled']) {
+                $invoker = $this->getFilterInvoker();
+                $result = $invoker->invoke($filter['filter']);
+
+                if ($result === false) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param IRoute $route
+     */
+    protected function applyParameterResolvers(IRoute $route) {
+        $parameters = $route->getParameters();
+        $resolvers = $this->getResolvers();
+        $invoker = $this->getParameterResolverInvoker();
+
+        foreach ($parameters as $name => $parameter) {
+            if ($resolver = array_get($resolvers, $name)) {
+                $parameters[$name] = $invoker->invoke($parameter, $resolver);
+            }
+        }
+
+        $route->setParameters($parameters);
+    }
+
+    /**
+     * @return IFilterInvoker
+     */
+    protected function createFilterInvoker() {
+        return new FilterInvoker();
+    }
+
+    /**
+     * @return IParameterResolverInvoker
+     */
+    protected function createParameterResolverInvoker() {
+        return new ParameterResolverInvoker();
     }
 }

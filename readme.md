@@ -19,6 +19,8 @@ handles cookies, headers and much more.
 [HTTP Blueprint](https://github.com/weew/php-http-blueprint): spin up a server,
 serve some content, shutdown the server.
 
+[Dependency Injection Container](https://github.com/weew/php-container): Router works great together with this library.
+
 ## Introduction
 
 What the router basically does is matching a URL to a list of registered
@@ -73,9 +75,42 @@ to consist of numerical characters only.
 
 ```php
 $router = new Router();
+$router
     ->addPattern('id', '[0-9]+')
     ->get('users/{id}', '');
 ```
+
+#### Routing filters / firewalls
+
+It is very easy to protect routes with custom filters.
+
+```php
+$router = new Router();
+$router->addFilter('auth', function() {
+    return false; // not authenticated
+});
+
+$router->enableFilter('auth');
+```
+A filter has to return a boolean value to indicate wether the affected routes are good to go or rather should be ignored. Filter work best with groups, see below.
+
+#### Parameter resolvers
+
+Often you might want to process a route parameter and replace it with another one. For example when you're using models. This route `/users/{id}` would always hold the id of the requested user. Wouldn't it be cool if it would hold the user model istead? 
+
+```php
+$router = new Router();
+$router->addResolver('user', function($parameter) {
+    return new User(); // for the sake of the example lets just return a new model
+});
+
+$router->get('users/{user}', function(User $user) {
+    // work with the user model
+});
+```
+
+User's id has been magically resolved to it's model. Now you can use it in your
+route handlers.
 
 #### Restrictions
 
@@ -85,6 +120,7 @@ subdomain or protocol.
 
 ```php
 $router = new Router();
+$router
     ->restrictSubdomain('api')
     ->get('users/{id}', '');
 ```
@@ -140,7 +176,7 @@ if ( ! $route === null) {
 
 #### Complete example
 
-A complete example of how you might use the router out of the box.
+A complete example of how you might use the router out of the box. The router itself is very flexible and at the end it comes down to your preference on how you will use it. Basically all it does is returning a route. After that it's up to you how you want to handle it. You might dynamically resolve the controller, or event combine it with a dependency injection container.
 
 ```php
 $router = new Router();
@@ -149,14 +185,23 @@ $router->get('/', 'home');
 $router->get('about', 'about');
 $router->post('login', 'login');
 
+$router->addFilter('auth', function() {
+    return fasle; // not logged in
+});
+
+$router->addResolver('user', function($id) {
+    return new User($id);
+});
+
 $router->group(function(IRouter $router) {
     $router->setBasePath('api/v1');
     $router->restrictProtocol('https');
     $router->restrictSubdomain('api');
+    $router->enableFilter('auth');
 
-    $router->get('users/{id}/{alias?}', function(IRoute $route) {
+    $router->get('users/{user}/{alias?}', function(IRoute $route) {
         $response = new JsonResponse(HttpRequestMethod::GET, [
-            'id' => $route->getParameter('id'),
+            'id' => $route->getParameter('user')->id,
             'alias' => $route->getParameter('alias', 'no alias')
         ]);
         $response->send();
@@ -167,9 +212,9 @@ $router->group(function(IRouter $router) {
     $router->setBasePath('api/v2');
     $router->addPattern('id', '[a-zA-Z]+');
 
-    $router->get('users/{id}/{alias?}', function(IRoute $route) {
+    $router->get('users/{user}/{alias?}', function(IRoute $route) {
         $response = new JsonResponse(HttpRequestMethod::GET, [
-            'id' => $route->getParameter('id'),
+            'id' => $route->getParameter('user')->id,
             'alias' => $route->getParameter('alias', 'no alias')
         ]);
         $response->send();

@@ -4,6 +4,7 @@ namespace Tests\Weew\Router;
 
 use PHPUnit_Framework_TestCase;
 use Weew\Http\HttpRequestMethod;
+use Weew\Router\Exceptions\FilterNotFoundException;
 use Weew\Router\IRoute;
 use Weew\Router\Route;
 use Weew\Router\Router;
@@ -254,5 +255,89 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
         $this->assertNull($matcher->match([$route], HttpRequestMethod::GET, $url));
         $matcher->setHosts(['foo.bar.baz']);
         $this->assertNotNull($matcher->match([$route], HttpRequestMethod::GET, $url));
+    }
+
+    public function test_get_and_set_filters() {
+        $matcher = new RoutesMatcher();
+        $this->assertEquals([], $matcher->getFilters());
+        $filters = [];
+        $matcher->setFilters($filters);
+        $this->assertTrue($filters === $matcher->getFilters());
+    }
+
+    public function test_add_filter() {
+        $matcher = new RoutesMatcher();
+        $matcher->addFilter('foo', function() {return 1;});
+        $filters = $matcher->getFilters();
+        $this->assertEquals(1, count($filters));
+        $this->assertNotNull($filters['foo']);
+        $this->assertEquals(1, $filters['foo']['filter']());
+        $this->assertFalse($filters['foo']['enabled']);
+    }
+
+    public function test_enable_filter() {
+        $matcher = new RoutesMatcher();
+        $matcher->addFilter('foo', function() {return 1;});
+        $filters = $matcher->getFilters();
+        $this->assertFalse($filters['foo']['enabled']);
+        $matcher->enableFilters(['foo']);
+        $filters = $matcher->getFilters();
+        $this->assertTrue($filters['foo']['enabled']);
+    }
+
+    public function test_enable_invalid_filter() {
+        $matcher = new RoutesMatcher();
+        $this->setExpectedException(FilterNotFoundException::class);
+        $matcher->enableFilters(['foo']);
+    }
+
+    public function test_filter_gets_invoked() {
+        $routes = [
+            new Route(HttpRequestMethod::GET, 'foo', 'value'),
+        ];
+        $matcher = new RoutesMatcher();
+        $matcher->addFilter('foo', function() {
+            return true;
+        });
+
+        $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
+        $this->assertNotNull($route);
+
+        $matcher->enableFilters(['foo']);
+        $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
+        $this->assertNotNull($route);
+
+        $matcher->addFilter('foo', function() {
+            return false;
+        });
+        $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
+        $this->assertNotNull($route);
+
+        $matcher->enableFilters(['foo']);
+        $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
+        $this->assertNull($route);
+    }
+
+    public function test_parameter_resolver_gets_invoked() {
+        $routes = [
+            new Route(HttpRequestMethod::GET, 'foo/{item}/{id}', 'value'),
+        ];
+        $matcher = new RoutesMatcher();
+        $matcher->addResolver('item', function($parameter) {
+            return $parameter + 1;
+        });
+        $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo/10/20'));
+
+        $this->assertNotNull($route);
+        $this->assertEquals(11, $route->getParameter('item'));
+        $this->assertEquals(20, $route->getParameter('id'));
+    }
+
+    public function test_get_and_set_resolvers() {
+        $matcher = new RoutesMatcher();
+        $this->assertEquals([], $matcher->getResolvers());
+        $resolvers = [];
+        $matcher->setResolvers($resolvers);
+        $this->assertTrue($resolvers === $matcher->getResolvers());
     }
 }
