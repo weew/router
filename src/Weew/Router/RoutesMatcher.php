@@ -92,28 +92,52 @@ class RoutesMatcher implements IRoutesMatcher {
             return null;
         }
 
+        return $this->matchRoute($routes, $method, $url);
+    }
+
+    /**
+     * @param array $routes
+     * @param $method
+     * @param IUrl $url
+     *
+     * @return IRoute|null
+     */
+    protected function matchRoute(array $routes, $method, IUrl $url) {
         foreach ($routes as $route) {
-            if ( ! $this->compareUrlToProtocols($url, $this->getProtocols()) ||
-                ! $this->compareUrlToHosts($url, $this->getHosts()) ||
-                ! $this->compareUrlToTLDs($url, $this->getTlds()) ||
-                ! $this->compareUrlToDomains($url, $this->getDomains()) ||
-                ! $this->compareUrlToSubdomains($url, $this->getSubdomains()) ||
-                ! $this->compareRouteToMethod($route, $method) ||
-                ! $this->compareRouteToUrl($route, $url)
-            ) {
-                continue;
+            if ($this->applyRestrictions($route, $method, $url)) {
+                $route->setParameters(
+                    $this->extractRouteParameters($route, $url)
+                );
+
+                $this->applyParameterResolvers($route);
+
+                return $route;
             }
-
-            $route->setParameters(
-                $this->extractRouteParameters($route, $url)
-            );
-
-            $this->applyParameterResolvers($route);
-
-            return $route;
         }
 
         return null;
+    }
+
+    /**
+     * @param IRoute $route
+     * @param $method
+     * @param IUrl $url
+     *
+     * @return bool
+     */
+    protected function applyRestrictions(IRoute $route, $method, IUrl $url) {
+        if ( ! $this->compareUrlToProtocols($url, $this->getProtocols()) ||
+            ! $this->compareUrlToHosts($url, $this->getHosts()) ||
+            ! $this->compareUrlToTLDs($url, $this->getTlds()) ||
+            ! $this->compareUrlToDomains($url, $this->getDomains()) ||
+            ! $this->compareUrlToSubdomains($url, $this->getSubdomains()) ||
+            ! $this->compareRouteToMethod($route, $method) ||
+            ! $this->compareRouteToUrl($route, $url)
+        ) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
