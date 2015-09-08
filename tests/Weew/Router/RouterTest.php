@@ -13,9 +13,7 @@ use Weew\Url\Url;
 
 class RouterTest extends PHPUnit_Framework_TestCase {
     public function test_get_and_set_routes() {
-        $routes = [];
-        $router = new Router($routes);
-        $this->assertTrue($routes === $router->getRoutes());
+        $router = new Router();
         $routes = [];
         $router->setRoutes($routes);
         $this->assertTrue($routes === $router->getRoutes());
@@ -26,7 +24,7 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 
     public function test_get_and_set_routes_matcher() {
         $matcher = new RoutesMatcher();
-        $router = new Router([], $matcher);
+        $router = new Router($matcher);
         $this->assertTrue($matcher === $router->getRoutesMatcher());
         $matcher = new RoutesMatcher();
         $router->setRoutesMatcher($matcher);

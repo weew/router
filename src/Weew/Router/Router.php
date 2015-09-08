@@ -14,7 +14,7 @@ class Router implements IRouter {
     /**
      * @var IRoute[]
      */
-    protected $routes;
+    protected $routes = [];
 
     /**
      * @var IRoutesMatcher
@@ -27,18 +27,15 @@ class Router implements IRouter {
     protected $basePath;
 
     /**
-     * @param IRoute[] $routes
      * @param IRoutesMatcher $matcher
      */
     public function __construct(
-        array $routes = [],
         IRoutesMatcher $matcher = null
     ) {
         if ( ! $matcher instanceof IRoutesMatcher) {
             $matcher = $this->createRoutesMatcher();
         }
 
-        $this->setRoutes($routes);
         $this->setRoutesMatcher($matcher);
     }
 
@@ -170,6 +167,10 @@ class Router implements IRouter {
         $this->getRoutesMatcher()->addPattern($name, $pattern);
 
         return $this;
+    }
+
+    public function addFilter($name, callable $callable) {
+
     }
 
     /**
@@ -317,7 +318,7 @@ class Router implements IRouter {
      * @return Router
      */
     protected function createRouter() {
-        return new Router([], $this->getRoutesMatcher());
+        return new Router($this->getRoutesMatcher());
     }
 
     /**
