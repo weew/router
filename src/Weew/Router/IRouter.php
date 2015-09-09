@@ -160,4 +160,14 @@ interface IRouter {
      * @param IRoute[] $routes
      */
     function setRoutes(array $routes);
+
+    /**
+     * @return IRoutesMatcher
+     */
+    function getRoutesMatcher();
+
+    /**
+     * @param IRoutesMatcher $matcher
+     */
+    function setRoutesMatcher(IRoutesMatcher $matcher);
 }
