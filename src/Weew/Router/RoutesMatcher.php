@@ -88,11 +88,16 @@ class RoutesMatcher implements IRoutesMatcher {
      * @see HttpRequestMethod
      */
     public function match(array $routes, $method, IUrl $url) {
-        if ( ! $this->applyFilters()) {
-            return null;
+        $route = $this->matchRoute($routes, $method, $url);
+
+        if ($route instanceof IRoute) {
+            if ($this->applyFilters()) {
+                $this->applyParameterResolvers($route);
+                return $route;
+            }
         }
 
-        return $this->matchRoute($routes, $method, $url);
+        return null;
     }
 
     /**
@@ -108,8 +113,6 @@ class RoutesMatcher implements IRoutesMatcher {
                 $route->setParameters(
                     $this->extractRouteParameters($route, $url)
                 );
-
-                $this->applyParameterResolvers($route);
 
                 return $route;
             }
@@ -604,7 +607,6 @@ class RoutesMatcher implements IRoutesMatcher {
      */
     protected function applyFilters() {
         foreach ($this->filters as $filter) {
-
             if ($filter['enabled']) {
                 $invoker = $this->getFilterInvoker();
                 $result = $invoker->invoke($filter['filter']);

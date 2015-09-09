@@ -143,10 +143,9 @@ interface IRouter {
 
     /**
      * @param $method
-     * @param $url
+     * @param IUrl $url
      *
-     * @return IRoute|null
-     *
+     * @return null|IRoute
      * @see HttpRequestMethod
      */
     function match($method, IUrl $url);

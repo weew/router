@@ -2,7 +2,9 @@
 
 namespace Weew\Router;
 
+use Exception;
 use Weew\Http\HttpRequestMethod;
+use Weew\Router\Exceptions\FilterException;
 use Weew\Url\IUrl;
 
 class Router implements IRouter {
@@ -43,27 +45,74 @@ class Router implements IRouter {
      * @param $method
      * @param IUrl $url
      *
-     * @return IRoute|null
-     *
-     * @see HttpRequestMethod
+     * @return null|IRoute
      */
     public function match($method, IUrl $url) {
-        $matcher = $this->getRoutesMatcher();
-        $route = $matcher->match($this->getRoutes(), $method, $url);
+        $exceptions = [];
+        $route = $this->matchRouter($method, $url, $exceptions);
 
-        if ($route !== null) {
-            return $route;
-        } else {
-            foreach ($this->nestedRouters as $router) {
-                $route = $router->match($method, $url);
+        if ($route === null && count($exceptions) > 0) {
+            $exception = array_pop($exceptions);
+            throw $exception->getOriginalException();
+        }
 
-                if ($route !== null) {
-                    return $route;
-                }
+        return $route;
+    }
+
+    /**
+     * @param $method
+     * @param IUrl $url
+     * @param array $exceptions
+     * @param IRoute|null $route
+     *
+     * @return null|IRoute
+     */
+    protected function matchRouter(
+        $method,
+        IUrl $url,
+        array &$exceptions,
+        IRoute $route = null
+    ) {
+        try {
+            $route = $this->getRoutesMatcher()
+                ->match($this->getRoutes(), $method, $url);
+        } catch (FilterException $ex) {
+            $exceptions[] = $ex;
+        }
+
+        if ($route === null) {
+            $route = $this->matchNestedRouters(
+                $method, $url, $exceptions, $route
+            );
+        }
+
+        return $route;
+    }
+
+    /**
+     * @param $method
+     * @param IUrl $url
+     * @param array $exceptions
+     * @param IRoute|null $route
+     *
+     * @return null|IRoute
+     */
+    protected function matchNestedRouters(
+        $method,
+        IUrl $url,
+        array &$exceptions,
+        IRoute $route = null
+    ) {
+        foreach ($this->nestedRouters as $router) {
+            $match = $router->matchRouter($method, $url, $exceptions, $route);
+
+            if ($match !== null) {
+                $route = $match;
+                break;
             }
         }
 
-        return null;
+        return $route;
     }
 
     /**

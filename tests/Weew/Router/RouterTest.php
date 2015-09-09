@@ -2,9 +2,11 @@
 
 namespace Tests\Weew\Router;
 
+use Exception;
 use PHPUnit_Framework_TestCase;
 use stdClass;
 use Weew\Http\HttpRequestMethod;
+use Weew\Router\Exceptions\FilterException;
 use Weew\Router\IRoute;
 use Weew\Router\IRouter;
 use Weew\Router\IRoutesMatcher;
@@ -234,5 +236,71 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $this->assertNotNull($route);
         $this->assertTrue($route->getParameter('user') instanceof stdClass);
         $this->assertEquals('foo', $route->getParameter('name'));
+    }
+
+    public function test_with_throwing_filters() {
+        $router = new Router();
+        $router->addFilter('foo', function() {
+            throw new FilterException(
+                new Exception('foo bar')
+            );
+        });
+
+        $router->group(function(IRouter $router) {
+            $router->get('users', 'users');
+        });
+        $router->group(function(IRouter $router) {
+            $router->enableFilter(['foo']);
+            $router->get('profile', 'profile');
+        });
+
+        $route = $router->match(HttpRequestMethod::GET, new Url('users'));
+        $this->assertNotNull($route);
+
+        $this->setExpectedException(Exception::class, 'foo bar');
+        $router->match(HttpRequestMethod::GET, new Url('profile'));
+    }
+
+    public function test_that_throwing_filters_get_temporarily_handled() {
+        $router = new Router();
+        $router->addFilter('foo', function() {
+            throw new FilterException(
+                new Exception('foo bar')
+            );
+        });
+
+        $router->group(function(IRouter $router) {
+            $router->get('users', 'users');
+        });
+        $router->group(function(IRouter $router) {
+            $router->enableFilter(['foo']);
+            $router->get('profile', 'profile');
+        });
+
+        $router->group(function(IRouter $router) {
+            $router->get('profile', 'unsecure');
+        });
+
+        $route = $router->match(HttpRequestMethod::GET, new Url('users'));
+        $this->assertNotNull($route);
+
+        $route = $router->match(HttpRequestMethod::GET, new Url('profile'));
+        $this->assertNotNull($route);
+        $this->assertEquals('unsecure', $route->getValue());
+    }
+
+    public function test_that_exceptions_thrown_by_filters_do_not_get_swallowed() {
+        $router = new Router();
+        $router->addFilter('foo', function() {
+            throw new Exception('foo bar');
+        });
+
+        $router->group(function(IRouter $router) {
+            $router->enableFilter(['foo']);
+            $router->get('profile', 'profile');
+        });
+
+        $this->setExpectedException(Exception::class, 'foo bar');
+        $router->match(HttpRequestMethod::GET, new Url('profile'));
     }
 }

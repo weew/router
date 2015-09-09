@@ -92,7 +92,21 @@ $router->addFilter('auth', function() {
 
 $router->enableFilter('auth');
 ```
+
 A filter has to return a boolean value to indicate wether the affected routes are good to go or rather should be ignored. Filter work best with groups, see below.
+
+Sometimes you might want to throw an exception that would hold the reason why a filter did not pass. If you simply throw a regular exception, this would kill the programm flow, and even if you catch this exception somewhere, it would kill the whole routing process. Even though a particular route did not match, because a filter failed, there might be another one that would fit. After a regular exception was thrown, there is no way another route might match. To work around this you might simply wrap you exception in the `FilterException`. This would ensure that the routing process finishes as supposed to and gives a chance for another route to match. If no route was found after all, you original exception will be thrown.
+
+```php
+$router = new Router();
+$router->addFilter('auth', function() {
+    throw new FilterException(
+        new UnauthorizedException()
+    );
+});
+```
+
+Now, failure of a filter will not break the routing process. If a route gets matched after all, there will be no exception thrown. But if there was no other route that could take it's place (be matched instead), the `UnauthorizedException` will be thrown.
 
 #### Parameter resolvers
 
