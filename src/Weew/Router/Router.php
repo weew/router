@@ -29,16 +29,28 @@ class Router implements IRouter {
     protected $basePath;
 
     /**
+     * @var ICallableInvoker
+     */
+    protected $callableInvoker;
+
+    /**
      * @param IRoutesMatcher $matcher
+     * @param ICallableInvoker $callableInvoker
      */
     public function __construct(
-        IRoutesMatcher $matcher = null
+        IRoutesMatcher $matcher = null,
+        ICallableInvoker $callableInvoker = null
     ) {
         if ( ! $matcher instanceof IRoutesMatcher) {
             $matcher = $this->createRoutesMatcher();
         }
 
+        if ( ! $callableInvoker instanceof ICallableInvoker) {
+            $callableInvoker = $this->createCallableInvoker();
+        }
+
         $this->setRoutesMatcher($matcher);
+        $this->setCallableInvoker($callableInvoker);
     }
 
     /**
@@ -54,62 +66,6 @@ class Router implements IRouter {
         if ($route === null && count($exceptions) > 0) {
             $exception = array_pop($exceptions);
             throw $exception->getOriginalException();
-        }
-
-        return $route;
-    }
-
-    /**
-     * @param $method
-     * @param IUrl $url
-     * @param array $exceptions
-     * @param IRoute|null $route
-     *
-     * @return null|IRoute
-     */
-    protected function matchRouter(
-        $method,
-        IUrl $url,
-        array &$exceptions,
-        IRoute $route = null
-    ) {
-        try {
-            $route = $this->getRoutesMatcher()
-                ->match($this->getRoutes(), $method, $url);
-        } catch (FilterException $ex) {
-            $exceptions[] = $ex;
-        }
-
-        if ($route === null) {
-            $route = $this->matchNestedRouters(
-                $method, $url, $exceptions, $route
-            );
-        }
-
-        return $route;
-    }
-
-    /**
-     * @param $method
-     * @param IUrl $url
-     * @param array $exceptions
-     * @param IRoute|null $route
-     *
-     * @return null|IRoute
-     */
-    protected function matchNestedRouters(
-        $method,
-        IUrl $url,
-        array &$exceptions,
-        IRoute $route = null
-    ) {
-        foreach ($this->nestedRouters as $router) {
-            $match = $router->matchRouter($method, $url, $exceptions, $route);
-
-            if ($match !== null) {
-                $route = $match;
-                break;
-            }
         }
 
         return $route;
@@ -199,9 +155,8 @@ class Router implements IRouter {
      */
     public function group(callable $callback) {
         $router = $this->createNestedRouter();
-        $this->addNestedRouter($router);
 
-        $this->invokeCallable($callback, $router);
+        $this->invokeCallable($router, $callback);
 
         return $this;
     }
@@ -372,6 +327,74 @@ class Router implements IRouter {
     }
 
     /**
+     * @return Router
+     */
+    public function createNestedRouter() {
+        $router = $this->createRouter();
+        $router->setBasePath($this->basePath);
+        $router->setRoutesMatcher(clone $router->getRoutesMatcher());
+        $this->addNestedRouter($router);
+
+        return $router;
+    }
+
+    /**
+     * @param $method
+     * @param IUrl $url
+     * @param array $exceptions
+     * @param IRoute|null $route
+     *
+     * @return null|IRoute
+     */
+    public function matchRouter(
+        $method,
+        IUrl $url,
+        array &$exceptions,
+        IRoute $route = null
+    ) {
+        try {
+            $route = $this->getRoutesMatcher()
+                ->match($this->getRoutes(), $method, $url);
+        } catch (FilterException $ex) {
+            $exceptions[] = $ex;
+        }
+
+        if ($route === null) {
+            $route = $this->matchNestedRouters(
+                $method, $url, $exceptions, $route
+            );
+        }
+
+        return $route;
+    }
+
+    /**
+     * @param $method
+     * @param IUrl $url
+     * @param array $exceptions
+     * @param IRoute|null $route
+     *
+     * @return null|IRoute
+     */
+    protected function matchNestedRouters(
+        $method,
+        IUrl $url,
+        array &$exceptions,
+        IRoute $route = null
+    ) {
+        foreach ($this->nestedRouters as $router) {
+            $match = $router->matchRouter($method, $url, $exceptions, $route);
+
+            if ($match !== null) {
+                $route = $match;
+                break;
+            }
+        }
+
+        return $route;
+    }
+
+    /**
      * @return RoutesMatcher
      */
     protected function createRoutesMatcher() {
@@ -406,17 +429,6 @@ class Router implements IRouter {
     }
 
     /**
-     * @return Router
-     */
-    protected function createNestedRouter() {
-        $router = $this->createRouter();
-        $router->setBasePath($this->basePath);
-        $router->setRoutesMatcher(clone $router->getRoutesMatcher());
-
-        return $router;
-    }
-
-    /**
      * @param IRouter $router
      */
     protected function addNestedRouter(IRouter $router) {
@@ -429,7 +441,25 @@ class Router implements IRouter {
      *
      * @return mixed
      */
-    protected function invokeCallable(callable $callable, IRouter $router) {
-        return $callable($router);
+    protected function invokeCallable(IRouter $router, callable $callable) {
+        $this->getCallableInvoker()->invoke($router, $callable);
+    }
+
+    /**
+     * @return ICallableInvoker
+     */
+    public function getCallableInvoker() {
+        return $this->callableInvoker;
+    }
+
+    /**
+     * @param ICallableInvoker $callableInvoker
+     */
+    public function setCallableInvoker(ICallableInvoker $callableInvoker) {
+        $this->callableInvoker = $callableInvoker;
+    }
+
+    protected function createCallableInvoker() {
+        return new CallableInvoker();
     }
 }

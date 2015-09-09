@@ -278,7 +278,9 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         });
 
         $router->group(function(IRouter $router) {
-            $router->get('profile', 'unsecure');
+            $router->group(function(IRouter $router) {
+                $router->get('profile', 'unsecure');
+            });
         });
 
         $route = $router->match(HttpRequestMethod::GET, new Url('users'));

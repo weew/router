@@ -69,6 +69,11 @@ interface IRouter {
     function group(callable $callback);
 
     /**
+     * @return IRouter
+     */
+    function createNestedRouter();
+
+    /**
      * @param $name
      * @param $pattern
      *
@@ -169,4 +174,14 @@ interface IRouter {
      * @param IRoutesMatcher $matcher
      */
     function setRoutesMatcher(IRoutesMatcher $matcher);
+
+    /**
+     * @return ICallableInvoker
+     */
+    function getCallableInvoker();
+
+    /**
+     * @param ICallableInvoker $callableInvoker
+     */
+    function setCallableInvoker(ICallableInvoker $callableInvoker);
 }
