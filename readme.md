@@ -5,35 +5,30 @@
 [![Coverage Status](https://coveralls.io/repos/weew/php-router/badge.svg?branch=master&service=github)](https://coveralls.io/github/weew/php-router?branch=master)
 [![License](https://poser.pugx.org/weew/php-router/license)](https://packagist.org/packages/weew/php-router)
 
+## Table of contents
+
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [Registering routes](#registering-routes)
+- [Route parameters](#route-parameters)
+- [Matching routes](#matching-routes)
+- [Custom patterns](#custom-patterns)
+- [Firewalls](#firewalls)
+- [Parameter resolvers](#parameter-resolvers)
+- [Rules](#rules)
+- [Grouping routes](#grouping-routes)
+- [Installation](#installation)
+- [Related projects](#related-projects)
+
+## Introduction
+
+What the router basically does is matching a URL to a list of registered routes and returns you a route upon a successful match. If there was no match,you'll get null. A route can contain any value you want, since it's up to you to create a response based on the route after all. This gives you the flexibility to use the router together with any other existing dependency injection containers or any other components. The router doesn't do anything but matching a URL to a route.
+
 ## Installation
 
 `composer require weew/php-router`
 
-## Related Projects
-
-[URL](https://github.com/weew/php-url): used throughout the project.
-
-[HTTP Layer](https://github.com/weew/php-http): offers response and request objects,
-handles cookies, headers and much more.
-
-[HTTP Blueprint](https://github.com/weew/php-http-blueprint): spin up a server,
-serve some content, shutdown the server.
-
-[Dependency Injection Container](https://github.com/weew/php-container): Router works great together with this library.
-
-## Introduction
-
-What the router basically does is matching a URL to a list of registered
-routes and returns you a route upon a successful match. If there was no match,
-you'll get null. A route can contain any value you want, since it's up to you
-to create a response based on the route after all. This gives you the flexibility
-to use the router together with any other existing dependency injection containers
-or any other components. The router doesn't do anything but matching a URL
-to a route.
-
-## Usage
-
-#### Registering routes
+## Registering routes
 
 Below you'll see the basic methods for route registration. Route path may
 contain some placeholders for expected values, like `{id}`. If
@@ -53,7 +48,7 @@ $router->get('/', 'home')
     ->options('you/wont/need/it', '');
 ```
 
-#### Route parameters
+## Route parameters
 
 Let's say you've defined some routes that expect a parameter
 to be set in the url, here you'll see how you can access them.
@@ -67,7 +62,27 @@ echo $route->getParameter('greeting');
 // welcome
 ```
 
-#### Custom patterns
+## Matching routes
+
+By now you have registered all of your routes and want to find
+the one that matches the specified url.
+
+```php
+$router = new Router();
+$router->get('home/{greeting?}', 'home');
+$route = $router->match(HttpRequestMethod::GET, new Url('home/hello-there'));
+
+if ( ! $route === null) {
+    echo $route->getValue();
+    // home
+    echo $route->getParameter('greeting');
+    // hello-there
+} else {
+    // no route found, thow a 404?
+}
+```
+
+## Custom patterns
 
 In some situations you wont to be able to specify custom
 patterns for route parameters. For example, lets say you want your ids
@@ -80,7 +95,7 @@ $router
     ->get('users/{id}', '');
 ```
 
-#### Routing filters / firewalls
+## Firewalls
 
 It is very easy to protect routes with custom filters.
 
@@ -108,7 +123,7 @@ $router->addFilter('auth', function() {
 
 Now, failure of a filter will not break the routing process. If a route gets matched after all, there will be no exception thrown. But if there was no other route that could take it's place (be matched instead), the `UnauthorizedException` will be thrown.
 
-#### Parameter resolvers
+## Parameter resolvers
 
 Often you might want to process a route parameter and replace it with another one. For example when you're using models. This route `/users/{id}` would always hold the id of the requested user. Wouldn't it be cool if it would hold the user model istead? 
 
@@ -126,7 +141,7 @@ $router->get('users/{user}', function(User $user) {
 User's id has been magically resolved to it's model. Now you can use it in your
 route handlers.
 
-#### Restrictions
+## Rules
 
 You might also want to specify additional routing restrictions
 based on the current url. For example, limiting your routes to a
@@ -150,7 +165,7 @@ $router->restrictProtocol('https')
     ->restrictHost(['domain1.com', 'domain2.net'])
 ```
 
-#### Grouping routes
+## Grouping routes
 
 Sometimes you have an obvious boundary between your routes.
 Lets say you want your api routes to be available from the
@@ -168,27 +183,7 @@ $router->group(function(IRouter $router) {
 $router->get('about', 'about');
 ```
 
-#### Matching routes to a URL
-
-By now you have registered all of your routes and want to find
-the one that matches the specified url.
-
-```php
-$router = new Router();
-$router->get('home/{greeting?}', 'home');
-$route = $router->match(HttpRequestMethod::GET, new Url('home/hello-there'));
-
-if ( ! $route === null) {
-    echo $route->getValue();
-    // home
-    echo $route->getParameter('greeting');
-    // hello-there
-} else {
-    // no route found, thow a 404?
-}
-```
-
-#### Complete example
+## Complete example
 
 A complete example of how you might use the router out of the box. The router itself is very flexible and at the end it comes down to your preference on how you will use it. Basically all it does is returning a route. After that it's up to you how you want to handle it. You might dynamically resolve the controller, or event combine it with a dependency injection container.
 
@@ -252,3 +247,15 @@ if ($route instanceof IRoute) {
     echo '404';
 }
 ```
+
+## Related Projects
+
+[URL](https://github.com/weew/php-url): used throughout the project.
+
+[HTTP Layer](https://github.com/weew/php-http): offers response and request objects,
+handles cookies, headers and much more.
+
+[HTTP Blueprint](https://github.com/weew/php-http-blueprint): spin up a server,
+serve some content, shutdown the server.
+
+[Dependency Injection Container](https://github.com/weew/php-container): Router works great together with this library.
