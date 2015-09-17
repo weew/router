@@ -23,7 +23,7 @@ class ParameterResolver implements IParameterResolver {
             $resolverInvoker = $this->createParameterResolverInvoker();
         }
 
-        $this->resolverInvoker = $resolverInvoker;
+        $this->setParameterResolverInvoker($resolverInvoker);
     }
 
     /**

@@ -180,7 +180,8 @@ class Router implements IRouter {
      * @return $this
      */
     public function addFilter($name, callable $callable) {
-        $this->getRoutesMatcher()->addFilter($name, $callable);
+        $this->getRoutesMatcher()->getFiltersMatcher()
+            ->addFilter($name, $callable);
 
         return $this;
     }
@@ -195,7 +196,8 @@ class Router implements IRouter {
             $name = [$name];
         }
 
-        $this->getRoutesMatcher()->enableFilters($name);
+        $this->getRoutesMatcher()->getFiltersMatcher()
+            ->enableFilters($name);
 
         return $this;
     }
@@ -345,6 +347,20 @@ class Router implements IRouter {
     }
 
     /**
+     * @return ICallableInvoker
+     */
+    public function getCallableInvoker() {
+        return $this->callableInvoker;
+    }
+
+    /**
+     * @param ICallableInvoker $callableInvoker
+     */
+    public function setCallableInvoker(ICallableInvoker $callableInvoker) {
+        $this->callableInvoker = $callableInvoker;
+    }
+
+    /**
      * @param $method
      * @param IUrl $url
      * @param array $exceptions
@@ -449,20 +465,6 @@ class Router implements IRouter {
      */
     protected function invokeCallable(IRouter $router, callable $callable) {
         $this->getCallableInvoker()->invoke($router, $callable);
-    }
-
-    /**
-     * @return ICallableInvoker
-     */
-    public function getCallableInvoker() {
-        return $this->callableInvoker;
-    }
-
-    /**
-     * @param ICallableInvoker $callableInvoker
-     */
-    public function setCallableInvoker(ICallableInvoker $callableInvoker) {
-        $this->callableInvoker = $callableInvoker;
     }
 
     /**

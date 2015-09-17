@@ -33,35 +33,14 @@ interface IRoutesMatcher {
     function addPattern($name, $pattern);
 
     /**
-     * @return array
+     * @return IFiltersMatcher
      */
-    function getFilters();
+    function getFiltersMatcher();
 
     /**
-     * @param array $filters
+     * @param IFiltersMatcher $filtersMatcher
      */
-    function setFilters(array $filters);
-
-    /**
-     * @param $name
-     * @param callable $filter
-     */
-    function addFilter($name, callable $filter);
-
-    /**
-     * @param $names
-     */
-    function enableFilters(array $names);
-
-    /**
-     * @return IFilterInvoker
-     */
-    function getFilterInvoker();
-
-    /**
-     * @param IFilterInvoker $filterInvoker
-     */
-    function setFilterInvoker(IFilterInvoker $filterInvoker);
+    function setFiltersMatcher(IFiltersMatcher $filtersMatcher);
 
     /**
      * @return IRestrictionsMatcher

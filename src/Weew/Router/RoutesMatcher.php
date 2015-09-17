@@ -2,7 +2,6 @@
 
 namespace Weew\Router;
 
-use Weew\Router\Exceptions\FilterNotFoundException;
 use Weew\Url\IUrl;
 
 class RoutesMatcher implements IRoutesMatcher {
@@ -12,19 +11,9 @@ class RoutesMatcher implements IRoutesMatcher {
     protected $patterns = [];
 
     /**
-     * @var array
+     * @var IFiltersMatcher
      */
-    protected $filters = [];
-
-    /**
-     * @var array
-     */
-    protected $parameterResolvers = [];
-
-    /**
-     * @var IFilterInvoker
-     */
-    protected $filterInvoker;
+    protected $filtersMatcher;
 
     /**
      * @var IRestrictionsMatcher
@@ -37,17 +26,17 @@ class RoutesMatcher implements IRoutesMatcher {
     protected $parameterResolver;
 
     /**
-     * @param IFilterInvoker|null $filterInvoker
+     * @param IFiltersMatcher $filtersMatcher
      * @param IRestrictionsMatcher $restrictionsMatcher
      * @param IParameterResolver $parameterResolver
      */
     public function __construct(
-        IFilterInvoker $filterInvoker = null,
+        IFiltersMatcher $filtersMatcher = null,
         IRestrictionsMatcher $restrictionsMatcher = null,
         IParameterResolver $parameterResolver = null
     ) {
-        if ( ! $filterInvoker instanceof IFilterInvoker) {
-            $filterInvoker = $this->createFilterInvoker();
+        if ( ! $filtersMatcher instanceof IFiltersMatcher) {
+            $filtersMatcher = $this->createFiltersMatcher();
         }
 
         if ( ! $restrictionsMatcher instanceof IRestrictionsMatcher) {
@@ -58,7 +47,7 @@ class RoutesMatcher implements IRoutesMatcher {
             $parameterResolver = $this->createParameterResolver();
         }
 
-        $this->setFilterInvoker($filterInvoker);
+        $this->setFiltersMatcher($filtersMatcher);
         $this->setRestrictionsMatcher($restrictionsMatcher);
         $this->setParameterResolver($parameterResolver);
 
@@ -78,7 +67,7 @@ class RoutesMatcher implements IRoutesMatcher {
         $route = $this->matchRoute($routes, $method, $url);
 
         if ($route instanceof IRoute) {
-            if ($this->applyFilters()) {
+            if ($this->getFiltersMatcher()->applyFilters()) {
                 $this->getParameterResolver()
                     ->resolveRouteParameters($route);
 
@@ -87,36 +76,6 @@ class RoutesMatcher implements IRoutesMatcher {
         }
 
         return null;
-    }
-
-    /**
-     * @param IRoute $route
-     * @param $method
-     *
-     * @return bool
-     */
-    public function compareRouteToMethod(IRoute $route, $method) {
-        return $route->getMethod() == $method;
-    }
-
-    /**
-     * @param IRoute $route
-     * @param IUrl $url
-     *
-     * @return bool
-     */
-    public function compareRouteToUrl(IRoute $route, IUrl $url) {
-        $path = $this->getUrlPath($url);
-        $pattern = $this->createRegexPatternForRoutePath($route->getPath());
-        $matches = [];
-
-        if (preg_match_all($pattern, $path, $matches) === 1) {
-            $matchedPath = $this->addTrailingSlash(array_get($matches, '0.0'));
-
-            return $matchedPath == $path;
-        };
-
-        return false;
     }
 
     /**
@@ -160,62 +119,17 @@ class RoutesMatcher implements IRoutesMatcher {
     }
 
     /**
-     * @return array
+     * @return IFiltersMatcher
      */
-    public function getFilters() {
-        return $this->filters;
+    public function getFiltersMatcher() {
+        return $this->filtersMatcher;
     }
 
     /**
-     * @param array $filters
+     * @param IFiltersMatcher $filtersMatcher
      */
-    public function setFilters(array $filters) {
-        $this->filters = $filters;
-    }
-
-    /**
-     * @param $name
-     * @param callable $filter
-     */
-    public function addFilter($name, callable $filter) {
-        $this->filters[$name] = [
-            'filter' => $filter,
-            'enabled' => false,
-        ];
-    }
-
-    /**
-     * @param array $names
-     *
-     * @throws FilterNotFoundException
-     */
-    public function enableFilters(array $names) {
-        foreach ($names as $name) {
-            $filter = array_get($this->filters, $name);
-
-            if ($filter === null) {
-                throw new FilterNotFoundException(
-                    s('Filter with name %s not found.', $name)
-                );
-            }
-
-            $filter['enabled'] = true;
-            $this->filters[$name] = $filter;
-        }
-    }
-
-    /**
-     * @return IFilterInvoker
-     */
-    public function getFilterInvoker() {
-        return $this->filterInvoker;
-    }
-
-    /**
-     * @param IFilterInvoker $filterInvoker
-     */
-    public function setFilterInvoker(IFilterInvoker $filterInvoker) {
-        $this->filterInvoker = $filterInvoker;
+    public function setFiltersMatcher(IFiltersMatcher $filtersMatcher) {
+        $this->filtersMatcher = $filtersMatcher;
     }
 
     /**
@@ -244,6 +158,36 @@ class RoutesMatcher implements IRoutesMatcher {
      */
     public function setParameterResolver(IParameterResolver $parameterResolver) {
         $this->parameterResolver = $parameterResolver;
+    }
+
+    /**
+     * @param IRoute $route
+     * @param $method
+     *
+     * @return bool
+     */
+    public function compareRouteToMethod(IRoute $route, $method) {
+        return $route->getMethod() == $method;
+    }
+
+    /**
+     * @param IRoute $route
+     * @param IUrl $url
+     *
+     * @return bool
+     */
+    public function compareRouteToUrl(IRoute $route, IUrl $url) {
+        $path = $this->getUrlPath($url);
+        $pattern = $this->createRegexPatternForRoutePath($route->getPath());
+        $matches = [];
+
+        if (preg_match_all($pattern, $path, $matches) === 1) {
+            $matchedPath = $this->addTrailingSlash(array_get($matches, '0.0'));
+
+            return $matchedPath == $path;
+        };
+
+        return false;
     }
 
     /**
@@ -299,6 +243,9 @@ class RoutesMatcher implements IRoutesMatcher {
     public function __clone() {
         $this->setRestrictionsMatcher(
             clone $this->getRestrictionsMatcher()
+        );
+        $this->setFiltersMatcher(
+            clone $this->getFiltersMatcher()
         );
     }
 
@@ -429,31 +376,6 @@ class RoutesMatcher implements IRoutesMatcher {
     }
 
     /**
-     * @return bool
-     */
-    protected function applyFilters() {
-        foreach ($this->filters as $filter) {
-            if ($filter['enabled']) {
-                $invoker = $this->getFilterInvoker();
-                $result = $invoker->invoke($filter['filter']);
-
-                if ($result === false) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @return IFilterInvoker
-     */
-    protected function createFilterInvoker() {
-        return new FilterInvoker();
-    }
-
-    /**
      * @return RestrictionsMatcher
      */
     protected function createRestrictionsMatcher() {
@@ -465,5 +387,12 @@ class RoutesMatcher implements IRoutesMatcher {
      */
     protected function createParameterResolver() {
         return new ParameterResolver();
+    }
+
+    /**
+     * @return FiltersMatcher
+     */
+    protected function createFiltersMatcher() {
+        return new FiltersMatcher();
     }
 }

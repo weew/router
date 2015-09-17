@@ -193,67 +193,6 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
         $this->assertNotNull($matcher->match([$route], HttpRequestMethod::GET, $url));
     }
 
-    public function test_get_and_set_filters() {
-        $matcher = new RoutesMatcher();
-        $this->assertEquals([], $matcher->getFilters());
-        $filters = [];
-        $matcher->setFilters($filters);
-        $this->assertTrue($filters === $matcher->getFilters());
-    }
-
-    public function test_add_filter() {
-        $matcher = new RoutesMatcher();
-        $matcher->addFilter('foo', function() {return 1;});
-        $filters = $matcher->getFilters();
-        $this->assertEquals(1, count($filters));
-        $this->assertNotNull($filters['foo']);
-        $this->assertEquals(1, $filters['foo']['filter']());
-        $this->assertFalse($filters['foo']['enabled']);
-    }
-
-    public function test_enable_filter() {
-        $matcher = new RoutesMatcher();
-        $matcher->addFilter('foo', function() {return 1;});
-        $filters = $matcher->getFilters();
-        $this->assertFalse($filters['foo']['enabled']);
-        $matcher->enableFilters(['foo']);
-        $filters = $matcher->getFilters();
-        $this->assertTrue($filters['foo']['enabled']);
-    }
-
-    public function test_enable_invalid_filter() {
-        $matcher = new RoutesMatcher();
-        $this->setExpectedException(FilterNotFoundException::class);
-        $matcher->enableFilters(['foo']);
-    }
-
-    public function test_filter_gets_invoked() {
-        $routes = [
-            new Route(HttpRequestMethod::GET, 'foo', 'value'),
-        ];
-        $matcher = new RoutesMatcher();
-        $matcher->addFilter('foo', function() {
-            return true;
-        });
-
-        $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
-        $this->assertNotNull($route);
-
-        $matcher->enableFilters(['foo']);
-        $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
-        $this->assertNotNull($route);
-
-        $matcher->addFilter('foo', function() {
-            return false;
-        });
-        $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
-        $this->assertNotNull($route);
-
-        $matcher->enableFilters(['foo']);
-        $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
-        $this->assertNull($route);
-    }
-
     public function test_parameter_resolver_gets_invoked() {
         $routes = [
             new Route(HttpRequestMethod::GET, 'foo/{item}/{id}', 'value'),
