@@ -27,40 +27,40 @@ class RoutesMatcher implements IRoutesMatcher {
     protected $filterInvoker;
 
     /**
-     * @var IParameterResolverInvoker
-     */
-    protected $parameterResolverInvoker;
-
-    /**
      * @var IRestrictionsMatcher
      */
     protected $restrictionsMatcher;
 
     /**
+     * @var IParameterResolver
+     */
+    protected $parameterResolver;
+
+    /**
      * @param IFilterInvoker|null $filterInvoker
-     * @param IParameterResolverInvoker|null $parameterResolverInvoker
      * @param IRestrictionsMatcher $restrictionsMatcher
+     * @param IParameterResolver $parameterResolver
      */
     public function __construct(
         IFilterInvoker $filterInvoker = null,
-        IParameterResolverInvoker $parameterResolverInvoker = null,
-        IRestrictionsMatcher $restrictionsMatcher = null
+        IRestrictionsMatcher $restrictionsMatcher = null,
+        IParameterResolver $parameterResolver = null
     ) {
         if ( ! $filterInvoker instanceof IFilterInvoker) {
             $filterInvoker = $this->createFilterInvoker();
-        }
-
-        if ( ! $parameterResolverInvoker instanceof IParameterResolverInvoker) {
-            $parameterResolverInvoker = $this->createParameterResolverInvoker();
         }
 
         if ( ! $restrictionsMatcher instanceof IRestrictionsMatcher) {
             $restrictionsMatcher = $this->createRestrictionsMatcher();
         }
 
+        if ( ! $parameterResolver instanceof IParameterResolver) {
+            $parameterResolver = $this->createParameterResolver();
+        }
+
         $this->setFilterInvoker($filterInvoker);
-        $this->setParameterResolverInvoker($parameterResolverInvoker);
         $this->setRestrictionsMatcher($restrictionsMatcher);
+        $this->setParameterResolver($parameterResolver);
 
         $this->addDefaultPatterns();
     }
@@ -79,7 +79,8 @@ class RoutesMatcher implements IRoutesMatcher {
 
         if ($route instanceof IRoute) {
             if ($this->applyFilters()) {
-                $this->applyParameterResolvers($route);
+                $this->getParameterResolver()
+                    ->resolveRouteParameters($route);
 
                 return $route;
             }
@@ -184,28 +185,6 @@ class RoutesMatcher implements IRoutesMatcher {
     }
 
     /**
-     * @return array
-     */
-    public function getResolvers() {
-        return $this->parameterResolvers;
-    }
-
-    /**
-     * @param array $resolvers
-     */
-    public function setResolvers(array $resolvers) {
-        $this->parameterResolvers = $resolvers;
-    }
-
-    /**
-     * @param $name
-     * @param callable $resolver
-     */
-    public function addResolver($name, callable $resolver) {
-        $this->parameterResolvers[$name] = $resolver;
-    }
-
-    /**
      * @param array $names
      *
      * @throws FilterNotFoundException
@@ -240,22 +219,6 @@ class RoutesMatcher implements IRoutesMatcher {
     }
 
     /**
-     * @return IParameterResolverInvoker
-     */
-    public function getParameterResolverInvoker() {
-        return $this->parameterResolverInvoker;
-    }
-
-    /**
-     * @param IParameterResolverInvoker $parameterResolverInvoker
-     */
-    public function setParameterResolverInvoker(
-        IParameterResolverInvoker $parameterResolverInvoker
-    ) {
-        $this->parameterResolverInvoker = $parameterResolverInvoker;
-    }
-
-    /**
      * @return IRestrictionsMatcher
      */
     public function getRestrictionsMatcher() {
@@ -267,6 +230,20 @@ class RoutesMatcher implements IRoutesMatcher {
      */
     public function setRestrictionsMatcher(IRestrictionsMatcher $restrictionsMatcher) {
         $this->restrictionsMatcher = $restrictionsMatcher;
+    }
+
+    /**
+     * @return IParameterResolver
+     */
+    public function getParameterResolver() {
+        return $this->parameterResolver;
+    }
+
+    /**
+     * @param IParameterResolver $parameterResolver
+     */
+    public function setParameterResolver(IParameterResolver $parameterResolver) {
+        $this->parameterResolver = $parameterResolver;
     }
 
     /**
@@ -470,23 +447,6 @@ class RoutesMatcher implements IRoutesMatcher {
     }
 
     /**
-     * @param IRoute $route
-     */
-    protected function applyParameterResolvers(IRoute $route) {
-        $parameters = $route->getParameters();
-        $resolvers = $this->getResolvers();
-        $invoker = $this->getParameterResolverInvoker();
-
-        foreach ($parameters as $name => $parameter) {
-            if ($resolver = array_get($resolvers, $name)) {
-                $parameters[$name] = $invoker->invoke($parameter, $resolver);
-            }
-        }
-
-        $route->setParameters($parameters);
-    }
-
-    /**
      * @return IFilterInvoker
      */
     protected function createFilterInvoker() {
@@ -494,16 +454,16 @@ class RoutesMatcher implements IRoutesMatcher {
     }
 
     /**
-     * @return IParameterResolverInvoker
-     */
-    protected function createParameterResolverInvoker() {
-        return new ParameterResolverInvoker();
-    }
-
-    /**
      * @return RestrictionsMatcher
      */
     protected function createRestrictionsMatcher() {
         return new RestrictionsMatcher();
+    }
+
+    /**
+     * @return ParameterResolver
+     */
+    protected function createParameterResolver() {
+        return new ParameterResolver();
     }
 }

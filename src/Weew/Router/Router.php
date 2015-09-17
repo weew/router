@@ -207,7 +207,8 @@ class Router implements IRouter {
      * @return $this
      */
     public function addResolver($name, callable $resolver) {
-        $this->getRoutesMatcher()->addResolver($name, $resolver);
+        $this->getRoutesMatcher()->getParameterResolver()
+            ->addResolver($name, $resolver);
 
         return $this;
     }

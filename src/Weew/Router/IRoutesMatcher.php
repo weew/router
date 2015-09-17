@@ -54,22 +54,6 @@ interface IRoutesMatcher {
     function enableFilters(array $names);
 
     /**
-     * @return array
-     */
-    function getResolvers();
-
-    /**
-     * @param array $resolvers
-     */
-    function setResolvers(array $resolvers);
-
-    /**
-     * @param $name
-     * @param callable $resolver
-     */
-    function addResolver($name, callable $resolver);
-
-    /**
      * @return IFilterInvoker
      */
     function getFilterInvoker();
@@ -80,16 +64,6 @@ interface IRoutesMatcher {
     function setFilterInvoker(IFilterInvoker $filterInvoker);
 
     /**
-     * @return IParameterResolverInvoker
-     */
-    function getParameterResolverInvoker();
-
-    /**
-     * @param IParameterResolverInvoker $parameterResolverInvoker
-     */
-    function setParameterResolverInvoker(IParameterResolverInvoker $parameterResolverInvoker);
-
-    /**
      * @return IRestrictionsMatcher
      */
     function getRestrictionsMatcher();
@@ -98,4 +72,14 @@ interface IRoutesMatcher {
      * @param IRestrictionsMatcher $restrictionsMatcher
      */
     function setRestrictionsMatcher(IRestrictionsMatcher $restrictionsMatcher);
+
+    /**
+     * @return IParameterResolver
+     */
+    function getParameterResolver();
+
+    /**
+     * @param IParameterResolver $parameterResolver
+     */
+    function setParameterResolver(IParameterResolver $parameterResolver);
 }

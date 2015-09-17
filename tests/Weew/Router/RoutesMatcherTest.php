@@ -259,7 +259,7 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
             new Route(HttpRequestMethod::GET, 'foo/{item}/{id}', 'value'),
         ];
         $matcher = new RoutesMatcher();
-        $matcher->addResolver('item', function($parameter) {
+        $matcher->getParameterResolver()->addResolver('item', function($parameter) {
             return $parameter + 1;
         });
         $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo/10/20'));
@@ -267,13 +267,5 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
         $this->assertNotNull($route);
         $this->assertEquals(11, $route->getParameter('item'));
         $this->assertEquals(20, $route->getParameter('id'));
-    }
-
-    public function test_get_and_set_resolvers() {
-        $matcher = new RoutesMatcher();
-        $this->assertEquals([], $matcher->getResolvers());
-        $resolvers = [];
-        $matcher->setResolvers($resolvers);
-        $this->assertTrue($resolvers === $matcher->getResolvers());
     }
 }
