@@ -9,31 +9,6 @@ class RoutesMatcher implements IRoutesMatcher {
     /**
      * @var array
      */
-    protected $protocols = [];
-
-    /**
-     * @var array
-     */
-    protected $tlds = [];
-
-    /**
-     * @var array
-     */
-    protected $domains = [];
-
-    /**
-     * @var array
-     */
-    protected $subdomains = [];
-
-    /**
-     * @var array
-     */
-    protected $hosts = [];
-
-    /**
-     * @var array
-     */
     protected $patterns = [];
 
     /**
@@ -57,12 +32,19 @@ class RoutesMatcher implements IRoutesMatcher {
     protected $parameterResolverInvoker;
 
     /**
+     * @var IRestrictionsMatcher
+     */
+    protected $restrictionsMatcher;
+
+    /**
      * @param IFilterInvoker|null $filterInvoker
      * @param IParameterResolverInvoker|null $parameterResolverInvoker
+     * @param IRestrictionsMatcher $restrictionsMatcher
      */
     public function __construct(
         IFilterInvoker $filterInvoker = null,
-        IParameterResolverInvoker $parameterResolverInvoker = null
+        IParameterResolverInvoker $parameterResolverInvoker = null,
+        IRestrictionsMatcher $restrictionsMatcher = null
     ) {
         if ( ! $filterInvoker instanceof IFilterInvoker) {
             $filterInvoker = $this->createFilterInvoker();
@@ -72,8 +54,13 @@ class RoutesMatcher implements IRoutesMatcher {
             $parameterResolverInvoker = $this->createParameterResolverInvoker();
         }
 
+        if ( ! $restrictionsMatcher instanceof IRestrictionsMatcher) {
+            $restrictionsMatcher = $this->createRestrictionsMatcher();
+        }
+
         $this->setFilterInvoker($filterInvoker);
         $this->setParameterResolverInvoker($parameterResolverInvoker);
+        $this->setRestrictionsMatcher($restrictionsMatcher);
 
         $this->addDefaultPatterns();
     }
@@ -93,26 +80,6 @@ class RoutesMatcher implements IRoutesMatcher {
         if ($route instanceof IRoute) {
             if ($this->applyFilters()) {
                 $this->applyParameterResolvers($route);
-                return $route;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * @param array $routes
-     * @param $method
-     * @param IUrl $url
-     *
-     * @return IRoute|null
-     */
-    protected function matchRoute(array $routes, $method, IUrl $url) {
-        foreach ($routes as $route) {
-            if ($this->applyRestrictions($route, $method, $url)) {
-                $route->setParameters(
-                    $this->extractRouteParameters($route, $url)
-                );
 
                 return $route;
             }
@@ -124,23 +91,31 @@ class RoutesMatcher implements IRoutesMatcher {
     /**
      * @param IRoute $route
      * @param $method
+     *
+     * @return bool
+     */
+    public function compareRouteToMethod(IRoute $route, $method) {
+        return $route->getMethod() == $method;
+    }
+
+    /**
+     * @param IRoute $route
      * @param IUrl $url
      *
      * @return bool
      */
-    protected function applyRestrictions(IRoute $route, $method, IUrl $url) {
-        if ( ! $this->compareUrlToProtocols($url, $this->getProtocols()) ||
-            ! $this->compareUrlToHosts($url, $this->getHosts()) ||
-            ! $this->compareUrlToTLDs($url, $this->getTlds()) ||
-            ! $this->compareUrlToDomains($url, $this->getDomains()) ||
-            ! $this->compareUrlToSubdomains($url, $this->getSubdomains()) ||
-            ! $this->compareRouteToMethod($route, $method) ||
-            ! $this->compareRouteToUrl($route, $url)
-        ) {
-            return false;
-        }
+    public function compareRouteToUrl(IRoute $route, IUrl $url) {
+        $path = $this->getUrlPath($url);
+        $pattern = $this->createRegexPatternForRoutePath($route->getPath());
+        $matches = [];
 
-        return true;
+        if (preg_match_all($pattern, $path, $matches) === 1) {
+            $matchedPath = $this->addTrailingSlash(array_get($matches, '0.0'));
+
+            return $matchedPath == $path;
+        };
+
+        return false;
     }
 
     /**
@@ -251,76 +226,6 @@ class RoutesMatcher implements IRoutesMatcher {
     }
 
     /**
-     * @return array
-     */
-    public function getProtocols() {
-        return $this->protocols;
-    }
-
-    /**
-     * @param array $protocols
-     */
-    public function setProtocols(array $protocols) {
-        $this->protocols = $protocols;
-    }
-
-    /**
-     * @return array
-     */
-    public function getTLDs() {
-        return $this->tlds;
-    }
-
-    /**
-     * @param array $tlds
-     */
-    public function setTLDs(array $tlds) {
-        $this->tlds = $tlds;
-    }
-
-    /**
-     * @return array
-     */
-    public function getDomains() {
-        return $this->domains;
-    }
-
-    /**
-     * @param array $domains
-     */
-    public function setDomains(array $domains) {
-        $this->domains = $domains;
-    }
-
-    /**
-     * @return array
-     */
-    public function getSubdomains() {
-        return $this->subdomains;
-    }
-
-    /**
-     * @param array $subdomains
-     */
-    public function setSubdomains(array $subdomains) {
-        $this->subdomains = $subdomains;
-    }
-
-    /**
-     * @return array
-     */
-    public function getHosts() {
-        return $this->hosts;
-    }
-
-    /**
-     * @param array $hosts
-     */
-    public function setHosts(array $hosts) {
-        $this->hosts = $hosts;
-    }
-
-    /**
      * @return IFilterInvoker
      */
     public function getFilterInvoker() {
@@ -351,103 +256,17 @@ class RoutesMatcher implements IRoutesMatcher {
     }
 
     /**
-     * @param IUrl $url
-     * @param array $protocols
-     *
-     * @return bool
+     * @return IRestrictionsMatcher
      */
-    public function compareUrlToProtocols(IUrl $url, array $protocols) {
-        if (count($protocols) == 0) {
-            return true;
-        }
-
-        return in_array($url->getProtocol(), $protocols);
+    public function getRestrictionsMatcher() {
+        return $this->restrictionsMatcher;
     }
 
     /**
-     * @param IUrl $url
-     * @param array $hosts
-     *
-     * @return bool
+     * @param IRestrictionsMatcher $restrictionsMatcher
      */
-    public function compareUrlToHosts(IUrl $url, array $hosts) {
-        if (count($hosts) == 0) {
-            return true;
-        }
-
-        return in_array($url->getHost(), $hosts);
-    }
-
-    /**
-     * @param IUrl $url
-     * @param array $tlds
-     *
-     * @return bool
-     */
-    public function compareUrlToTLDs(IUrl $url, array $tlds) {
-        if (count($tlds) == 0) {
-            return true;
-        }
-
-        return in_array($url->getTLD(), $tlds);
-    }
-
-    /**
-     * @param IUrl $url
-     * @param array $domains
-     *
-     * @return bool
-     */
-    public function compareUrlToDomains(IUrl $url, array $domains) {
-        if (count($domains) == 0) {
-            return true;
-        }
-
-        return in_array($url->getDomain(), $domains);
-    }
-
-    /**
-     * @param IUrl $url
-     * @param array $subdomains
-     *
-     * @return bool
-     */
-    public function compareUrlToSubdomains(IUrl $url, array $subdomains) {
-        if (count($subdomains) == 0) {
-            return true;
-        }
-
-        return in_array($url->getSubdomain(), $subdomains);
-    }
-
-    /**
-     * @param IRoute $route
-     * @param $method
-     *
-     * @return bool
-     */
-    public function compareRouteToMethod(IRoute $route, $method) {
-        return $route->getMethod() == $method;
-    }
-
-    /**
-     * @param IRoute $route
-     * @param IUrl $url
-     *
-     * @return bool
-     */
-    public function compareRouteToUrl(IRoute $route, IUrl $url) {
-        $path = $this->getUrlPath($url);
-        $pattern = $this->createRegexPatternForRoutePath($route->getPath());
-        $matches = [];
-
-        if (preg_match_all($pattern, $path, $matches) === 1) {
-            $matchedPath = $this->addTrailingSlash(array_get($matches, '0.0'));
-
-            return $matchedPath == $path;
-        };
-
-        return false;
+    public function setRestrictionsMatcher(IRestrictionsMatcher $restrictionsMatcher) {
+        $this->restrictionsMatcher = $restrictionsMatcher;
     }
 
     /**
@@ -498,6 +317,36 @@ class RoutesMatcher implements IRoutesMatcher {
         $values = $this->processRouteParameterValues($matches);
 
         return $values;
+    }
+
+    public function __clone() {
+        $this->setRestrictionsMatcher(
+            clone $this->getRestrictionsMatcher()
+        );
+    }
+
+    /**
+     * @param array $routes
+     * @param $method
+     * @param IUrl $url
+     *
+     * @return IRoute|null
+     */
+    protected function matchRoute(array $routes, $method, IUrl $url) {
+        foreach ($routes as $route) {
+            if ($this->compareRouteToMethod($route, $method) &&
+                $this->compareRouteToUrl($route, $url) &&
+                $this->getRestrictionsMatcher()->matchRestrictions($url)
+            ) {
+                $route->setParameters(
+                    $this->extractRouteParameters($route, $url)
+                );
+
+                return $route;
+            }
+        }
+
+        return null;
     }
 
     protected function addDefaultPatterns() {
@@ -649,5 +498,12 @@ class RoutesMatcher implements IRoutesMatcher {
      */
     protected function createParameterResolverInvoker() {
         return new ParameterResolverInvoker();
+    }
+
+    /**
+     * @return RestrictionsMatcher
+     */
+    protected function createRestrictionsMatcher() {
+        return new RestrictionsMatcher();
     }
 }

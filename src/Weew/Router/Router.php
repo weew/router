@@ -233,7 +233,8 @@ class Router implements IRouter {
             $protocol = [$protocol];
         }
 
-        $this->getRoutesMatcher()->setProtocols($protocol);
+        $this->getRoutesMatcher()->getRestrictionsMatcher()
+            ->setProtocols($protocol);
 
         return $this;
     }
@@ -248,7 +249,8 @@ class Router implements IRouter {
             $tld = [$tld];
         }
 
-        $this->getRoutesMatcher()->setTLDs($tld);
+        $this->getRoutesMatcher()->getRestrictionsMatcher()
+            ->setTLDs($tld);
 
         return $this;
     }
@@ -263,7 +265,8 @@ class Router implements IRouter {
             $domain = [$domain];
         }
 
-        $this->getRoutesMatcher()->setDomains($domain);
+        $this->getRoutesMatcher()->getRestrictionsMatcher()
+            ->setDomains($domain);
 
         return $this;
     }
@@ -278,7 +281,8 @@ class Router implements IRouter {
             $subdomain = [$subdomain];
         }
 
-        $this->getRoutesMatcher()->setSubdomains($subdomain);
+        $this->getRoutesMatcher()->getRestrictionsMatcher()
+            ->setSubdomains($subdomain);
 
         return $this;
     }
@@ -293,7 +297,8 @@ class Router implements IRouter {
             $host = [$host];
         }
 
-        $this->getRoutesMatcher()->setHosts($host);
+        $this->getRoutesMatcher()->getRestrictionsMatcher()
+            ->setHosts($host);
 
         return $this;
     }
@@ -459,6 +464,9 @@ class Router implements IRouter {
         $this->callableInvoker = $callableInvoker;
     }
 
+    /**
+     * @return CallableInvoker
+     */
     protected function createCallableInvoker() {
         return new CallableInvoker();
     }

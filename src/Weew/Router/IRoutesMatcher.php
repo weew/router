@@ -70,56 +70,6 @@ interface IRoutesMatcher {
     function addResolver($name, callable $resolver);
 
     /**
-     * @return array
-     */
-    function getProtocols();
-
-    /**
-     * @param array $protocols
-     */
-    function setProtocols(array $protocols);
-
-    /**
-     * @return array
-     */
-    function getTLDs();
-
-    /**
-     * @param array $tlds
-     */
-    function setTLDs(array $tlds);
-
-    /**
-     * @return array
-     */
-    function getDomains();
-
-    /**
-     * @param array $domains
-     */
-    function setDomains(array $domains);
-
-    /**
-     * @return array
-     */
-    function getSubdomains();
-
-    /**
-     * @param array $subdomains
-     */
-    function setSubdomains(array $subdomains);
-
-    /**
-     * @return array
-     */
-    function getHosts();
-
-    /**
-     * @param array $hosts
-     */
-    function setHosts(array $hosts);
-
-    /**
      * @return IFilterInvoker
      */
     function getFilterInvoker();
@@ -138,4 +88,14 @@ interface IRoutesMatcher {
      * @param IParameterResolverInvoker $parameterResolverInvoker
      */
     function setParameterResolverInvoker(IParameterResolverInvoker $parameterResolverInvoker);
+
+    /**
+     * @return IRestrictionsMatcher
+     */
+    function getRestrictionsMatcher();
+
+    /**
+     * @param IRestrictionsMatcher $restrictionsMatcher
+     */
+    function setRestrictionsMatcher(IRestrictionsMatcher $restrictionsMatcher);
 }
