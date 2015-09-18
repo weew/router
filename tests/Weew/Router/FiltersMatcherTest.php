@@ -6,6 +6,7 @@ use PHPUnit_Framework_TestCase;
 use Weew\Http\HttpRequestMethod;
 use Weew\Router\Exceptions\FilterNotFoundException;
 use Weew\Router\FiltersMatcher;
+use Weew\Router\IRoute;
 use Weew\Router\Route;
 use Weew\Router\RoutesMatcher;
 use Weew\Url\Url;
@@ -43,6 +44,17 @@ class FiltersMatcherTest extends PHPUnit_Framework_TestCase {
         $matcher = new FiltersMatcher();
         $this->setExpectedException(FilterNotFoundException::class);
         $matcher->enableFilters(['foo']);
+    }
+
+    public function test_route_gets_passed_to_filter() {
+        $matcher = new FiltersMatcher();
+        $bar = 1;
+        $matcher->addFilter('foo', function(IRoute $route) use (&$bar) {
+            $bar += $route->getValue();
+        });
+        $matcher->enableFilters(['foo']);
+        $matcher->applyFilters(new Route(HttpRequestMethod::GET, '', '5'));
+        $this->assertEquals(6, $bar);
     }
 
     public function test_filter_gets_invoked() {

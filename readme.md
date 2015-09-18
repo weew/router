@@ -101,7 +101,7 @@ It is very easy to protect routes with custom filters.
 
 ```php
 $router = new Router();
-$router->addFilter('auth', function() {
+$router->addFilter('auth', function(IRoute $route) {
     return false; // not authenticated
 });
 
@@ -114,7 +114,7 @@ Sometimes you might want to throw an exception that would hold the reason why a 
 
 ```php
 $router = new Router();
-$router->addFilter('auth', function() {
+$router->addFilter('auth', function(IRoute $route) {
     throw new FilterException(
         new UnauthorizedException()
     );
@@ -125,7 +125,7 @@ Now, failure of a filter will not break the routing process. If a route gets mat
 
 ## Parameter resolvers
 
-Often you might want to process a route parameter and replace it with another one. For example when you're using models. This route `/users/{id}` would always hold the id of the requested user. Wouldn't it be cool if it would hold the user model istead? 
+Often you might want to process a route parameter and replace it with another one. For example when you're using models. This route `/users/{id}` would always hold the id of the requested user. Wouldn't it be cool if it would hold the user model istead?
 
 ```php
 $router = new Router();
@@ -194,7 +194,7 @@ $router->get('/', 'home');
 $router->get('about', 'about');
 $router->post('login', 'login');
 
-$router->addFilter('auth', function() {
+$router->addFilter('auth', function(IRoute $route) {
     return fasle; // not logged in
 });
 

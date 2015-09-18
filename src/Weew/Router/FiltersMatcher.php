@@ -27,13 +27,15 @@ class FiltersMatcher implements IFiltersMatcher {
     }
 
     /**
+     * @param IRoute $route
+     *
      * @return bool
      */
-    public function applyFilters() {
+    public function applyFilters(IRoute $route) {
         foreach ($this->getFilters() as $filter) {
             if ($filter['enabled']) {
                 $invoker = $this->getFilterInvoker();
-                $result = $invoker->invoke($filter['filter']);
+                $result = $invoker->invoke($filter['filter'], $route);
 
                 if ($result === false) {
                     return false;

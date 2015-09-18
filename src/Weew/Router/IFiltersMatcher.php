@@ -4,9 +4,11 @@ namespace Weew\Router;
 
 interface IFiltersMatcher {
     /**
+     * @param IRoute $route
+     *
      * @return bool
      */
-    function applyFilters();
+    function applyFilters(IRoute $route);
 
     /**
      * @return array
