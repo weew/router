@@ -17,7 +17,7 @@
 - [Parameter resolvers](#parameter-resolvers)
 - [Rules](#rules)
 - [Grouping routes](#grouping-routes)
-- [Installation](#installation)
+- [Complete example](#complete-example)
 - [Related projects](#related-projects)
 
 ## Introduction
