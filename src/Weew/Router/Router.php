@@ -149,6 +149,16 @@ class Router implements IRouter {
     }
 
     /**
+     * @param $path
+     * @param $abstract
+     *
+     * @return Router
+     */
+    public function head($path, $abstract) {
+        return $this->createRoute(HttpRequestMethod::HEAD, $path, $abstract);
+    }
+
+    /**
      * @param callable $callback
      *
      * @return $this
@@ -437,8 +447,11 @@ class Router implements IRouter {
         }
 
         $route = new Route($method, $path, $abstract);
-
         $this->routes[] = $route;
+
+        if ($method == HttpRequestMethod::GET) {
+            $this->createRoute(HttpRequestMethod::HEAD, $path, $abstract);
+        }
 
         return $this;
     }

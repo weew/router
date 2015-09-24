@@ -62,6 +62,14 @@ interface IRouter {
     function options($path, $abstract);
 
     /**
+     * @param $path
+     * @param $abstract
+     *
+     * @return IRouter
+     */
+    function head($path, $abstract);
+
+    /**
      * @param callable $callback
      *
      * @return IRouter

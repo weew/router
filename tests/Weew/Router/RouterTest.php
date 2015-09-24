@@ -40,6 +40,7 @@ class RouterTest extends PHPUnit_Framework_TestCase {
     public function test_route_methods() {
         $router = new Router();
         $router->get('get', '_get');
+        $router->head('head', '_head');
         $router->post('post', '_post');
         $router->put('put', '_put');
         $router->update('update', '_update');
@@ -48,13 +49,15 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $router->options('options', '_options');
 
         $routes = $router->getRoutes();
-        $this->assertEquals('_get', $routes[0]->getValue());
-        $this->assertEquals('_post', $routes[1]->getValue());
-        $this->assertEquals('_put', $routes[2]->getValue());
-        $this->assertEquals('_update', $routes['3']->getValue());
-        $this->assertEquals('_patch', $routes['4']->getValue());
-        $this->assertEquals('_delete', $routes[5]->getValue());
-        $this->assertEquals('_options', $routes[6]->getValue());
+        $this->assertEquals('_get', array_shift($routes)->getValue());
+        $this->assertEquals('_get', array_shift($routes)->getValue());
+        $this->assertEquals('_head', array_shift($routes)->getValue());
+        $this->assertEquals('_post', array_shift($routes)->getValue());
+        $this->assertEquals('_put', array_shift($routes)->getValue());
+        $this->assertEquals('_update', array_shift($routes)->getValue());
+        $this->assertEquals('_patch', array_shift($routes)->getValue());
+        $this->assertEquals('_delete', array_shift($routes)->getValue());
+        $this->assertEquals('_options', array_shift($routes)->getValue());
     }
 
     public function test_match() {
@@ -304,5 +307,19 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 
         $this->setExpectedException(Exception::class, 'foo bar');
         $router->match(HttpRequestMethod::GET, new Url('profile'));
+    }
+
+    public function test_head_routes_get_added() {
+        $router = new Router();
+        $router->get('foo', 'foo');
+        $router->head('bar', 'bar');
+
+        $route = $router->match(HttpRequestMethod::HEAD, new Url('foo'));
+        $this->assertNotNull($route);
+        $this->assertEquals('foo', $route->getValue());
+
+        $route = $router->match(HttpRequestMethod::HEAD, new Url('bar'));
+        $this->assertNotNull($route);
+        $this->assertEquals('bar', $route->getValue());
     }
 }
