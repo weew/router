@@ -7,8 +7,8 @@
 
 ## Table of contents
 
-- [Introduction](#introduction)
 - [Installation](#installation)
+- [Introduction](#introduction)
 - [Registering routes](#registering-routes)
 - [Route parameters](#route-parameters)
 - [Matching routes](#matching-routes)
@@ -20,13 +20,13 @@
 - [Complete example](#complete-example)
 - [Related projects](#related-projects)
 
-## Introduction
-
-What the router basically does is matching a URL to a list of registered routes and returns you a route upon a successful match. If there was no match,you'll get null. A route can contain any value you want, since it's up to you to create a response based on the route after all. This gives you the flexibility to use the router together with any other existing dependency injection containers or any other components. The router doesn't do anything but matching a URL to a route.
-
 ## Installation
 
 `composer require weew/php-router`
+
+## Introduction
+
+What the router basically does is matching a URL to a list of registered routes and returns you a route upon a successful match. If there was no match,you'll get null. A route can contain any value you want, since it's up to you to create a response based on the route after all. This gives you the flexibility to use the router together with any other existing dependency injection containers or any other components. The router doesn't do anything but matching a URL to a route.
 
 ## Registering routes
 
