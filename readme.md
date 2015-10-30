@@ -250,12 +250,9 @@ if ($route instanceof IRoute) {
 
 ## Related Projects
 
-[URL](https://github.com/weew/php-url): used throughout the project.
-
-[HTTP Layer](https://github.com/weew/php-http): offers response and request objects,
+- [URL](https://github.com/weew/php-url): used throughout the project.
+- [HTTP Layer](https://github.com/weew/php-http): offers response and request objects,
 handles cookies, headers and much more.
-
-[HTTP Blueprint](https://github.com/weew/php-http-blueprint): spin up a server,
+- [HTTP Blueprint](https://github.com/weew/php-http-blueprint): spin up a server,
 serve some content, shutdown the server.
-
-[Dependency Injection Container](https://github.com/weew/php-container): Router works great together with this library.
+- [Dependency Injection Container](https://github.com/weew/php-container): Router works great together with this library.
