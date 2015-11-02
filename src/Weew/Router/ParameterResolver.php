@@ -36,7 +36,7 @@ class ParameterResolver implements IParameterResolver {
 
         foreach ($parameters as $name => $parameter) {
             if ($resolver = array_get($resolvers, $name)) {
-                $parameters[$name] = $invoker->invoke($parameter, $resolver);
+                $parameters[$name] = $invoker->invoke($resolver, $parameter);
             }
         }
 

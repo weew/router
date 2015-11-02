@@ -4,10 +4,10 @@ namespace Weew\Router;
 
 interface IParameterResolverInvoker {
     /**
-     * @param $parameter
      * @param callable $resolver
+     * @param $parameter
      *
      * @return mixed
      */
-    function invoke($parameter, callable $resolver);
+    function invoke(callable $resolver, $parameter);
 }

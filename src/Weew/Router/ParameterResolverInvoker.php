@@ -4,12 +4,12 @@ namespace Weew\Router;
 
 class ParameterResolverInvoker implements IParameterResolverInvoker {
     /**
-     * @param $parameter
      * @param callable $resolver
+     * @param $parameter
      *
      * @return mixed
      */
-    public function invoke($parameter, callable $resolver) {
+    public function invoke(callable $resolver, $parameter) {
         return $resolver($parameter);
     }
 }
