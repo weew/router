@@ -4,8 +4,8 @@ namespace Weew\Router;
 
 interface ICallableInvoker {
     /**
-     * @param IRouter $router
      * @param callable $callable
+     * @param IRouter $router
      */
-    function invoke(IRouter $router, callable $callable);
+    function invoke(callable $callable, IRouter $router);
 }

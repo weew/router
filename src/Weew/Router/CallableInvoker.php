@@ -4,10 +4,10 @@ namespace Weew\Router;
 
 class CallableInvoker implements ICallableInvoker {
     /**
-     * @param IRouter $router
      * @param callable $callable
+     * @param IRouter $router
      */
-    public function invoke(IRouter $router, callable $callable) {
+    public function invoke(callable $callable, IRouter $router) {
         $callable($router);
     }
 }
