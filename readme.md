@@ -20,6 +20,7 @@
 - [Rules](#rules)
 - [Grouping routes](#grouping-routes)
 - [Complete example](#complete-example)
+- [Existing container integrations](#existing-container-integrations)
 - [Related projects](#related-projects)
 
 ## Installation
@@ -249,6 +250,10 @@ if ($route instanceof IRoute) {
     echo '404';
 }
 ```
+
+## Existing container integrations
+
+There is an integration available for the [weew/php-container](https://github.com/weew/php-container) container. See [weew/php-router-container-aware](https://github.com/weew/php-router-container-aware).
 
 ## Related Projects
 
