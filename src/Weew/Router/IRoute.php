@@ -2,7 +2,7 @@
 
 namespace Weew\Router;
 
-use Weew\Foundation\Interfaces\IArrayable;
+use Weew\Contracts\IArrayable;
 
 interface IRoute extends IArrayable {
     /**
