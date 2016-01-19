@@ -322,4 +322,37 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $this->assertNotNull($route);
         $this->assertEquals('bar', $route->getValue());
     }
+
+    public function test_get_and_set_controller() {
+        $router = new Router();
+        $this->assertNull($router->getController());
+        $anotherRouter = $router->setController('foo');
+        $this->assertTrue($router !== $anotherRouter);
+        $this->assertTrue($anotherRouter instanceof IRouter);
+        $this->assertEquals('foo', $anotherRouter->getController());
+        $this->assertTrue(
+            $anotherRouter->removeController() instanceof IRouter
+        );
+        $this->assertNull($anotherRouter->getController());
+    }
+
+    public function test_register_route_with_controller() {
+        $router = new Router();
+        $anotherRouter = $router->setController('foo');
+        $anotherRouter->get('/', 'bar');
+
+        $routes = $anotherRouter->getRoutes();
+        $this->assertTrue(is_array($routes));
+        $this->assertTrue(count($routes) > 0);
+        $route = $routes[0];
+        $handler = $route->getValue();
+        $this->assertEquals(['foo', 'bar'], $handler);
+    }
+
+    public function test_set_controller_without_nesting() {
+        $router = new Router();
+        $anotherRouter = $router->setController('foo', false);
+        $this->assertTrue($router === $anotherRouter);
+        $this->assertEquals('foo', $router->getController());
+    }
 }

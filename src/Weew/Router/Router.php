@@ -29,6 +29,11 @@ class Router implements IRouter {
     protected $basePath;
 
     /**
+     * @var string
+     */
+    protected $controller;
+
+    /**
      * @var ICallableInvoker
      */
     protected $callableInvoker;
@@ -69,6 +74,41 @@ class Router implements IRouter {
         }
 
         return $route;
+    }
+
+    /**
+     * @return string
+     */
+    public function getController() {
+        return $this->controller;
+    }
+
+    /**
+     * @param $class
+     * @param bool $nest
+     *
+     * @return IRouter
+     */
+    public function setController($class, $nest = true) {
+        if ($nest) {
+            $router = $this->createNestedRouter();
+            $router->setController($class, false);
+
+            return $router;
+        }
+
+        $this->controller = $class;
+
+        return $this;
+    }
+
+    /**
+     * @return IRouter
+     */
+    public function removeController() {
+        $this->controller = null;
+
+        return $this;
     }
 
     /**
@@ -445,14 +485,31 @@ class Router implements IRouter {
             $path = url($this->basePath, $path);
         }
 
-        $route = new Route($method, $path, $abstract);
+        $handler = $this->createHandler($abstract);
+        $route = new Route($method, $path, $handler);
         $this->routes[] = $route;
 
         if ($method == HttpRequestMethod::GET) {
-            $this->createRoute(HttpRequestMethod::HEAD, $path, $abstract);
+            $this->createRoute(HttpRequestMethod::HEAD, $path, $handler);
         }
 
         return $this;
+    }
+
+    /**
+     * @param $abstract
+     *
+     * @return array
+     */
+    protected function createHandler($abstract) {
+        $controller = $this->getController();
+
+        if ($controller !== null &&
+            is_string($abstract)) {
+            $abstract = [$controller, $abstract];
+        }
+
+        return $abstract;
     }
 
     /**

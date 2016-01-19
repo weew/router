@@ -51,6 +51,27 @@ $router->get('/', 'home')
     ->options('you/wont/need/it', '');
 ```
 
+Mostly you are going to use this definition format for your route definitions:
+
+```php
+$router = new Router();
+$router
+    ->get('/', [SampleController::class, 'getHome'])
+    ->get('about', [SampleController::class, 'getAbout'])
+    ->get('contact', [SampleController::class, 'getContact']);
+```
+
+As you see in this example, you've got to write the `SampleController` class over and over again. You can avoid this by setting a controller class on the router itself. Doing so, will create a new [nested router](#grouping-routes). Example below does exactly the same as the example above, except you have less boilerplate code.
+
+```php
+$router = new Router();
+$router
+    ->setController(SampleController::class)
+        ->get('/', 'getHome')
+        ->get('about', 'getAbout')
+        ->get('contact', 'getContact');
+```
+
 ## Route parameters
 
 Let's say you've defined some routes that expect a parameter
@@ -111,9 +132,9 @@ $router->addFilter('auth', function(IRoute $route) {
 $router->enableFilter('auth');
 ```
 
-A filter has to return a boolean value to indicate wether the affected routes are good to go or rather should be ignored. Filter work best with groups, see below.
+A filter has to return a boolean value to indicate whether the affected routes are good to go or rather should be ignored. Filter work best with groups, see below.
 
-Sometimes you might want to throw an exception that would hold the reason why a filter did not pass. If you simply throw a regular exception, this would kill the programm flow, and even if you catch this exception somewhere, it would kill the whole routing process. Even though a particular route did not match, because a filter failed, there might be another one that would fit. After a regular exception was thrown, there is no way another route might match. To work around this you might simply wrap you exception in the `FilterException`. This would ensure that the routing process finishes as supposed to and gives a chance for another route to match. If no route was found after all, you original exception will be thrown.
+Sometimes you might want to throw an exception that would hold the reason why a filter did not pass. If you simply throw a regular exception, this would kill the program flow, and even if you catch this exception somewhere, it would kill the whole routing process. Even though a particular route did not match, because a filter failed, there might be another one that would fit. After a regular exception was thrown, there is no way another route might match. To work around this you might simply wrap you exception in the `FilterException`. This would ensure that the routing process finishes as supposed to and gives a chance for another route to match. If no route was found after all, you original exception will be thrown.
 
 ```php
 $router = new Router();
@@ -128,7 +149,7 @@ Now, failure of a filter will not break the routing process. If a route gets mat
 
 ## Parameter resolvers
 
-Often you might want to process a route parameter and replace it with another one. For example when you're using models. This route `/users/{id}` would always hold the id of the requested user. Wouldn't it be cool if it would hold the user model istead?
+Often you might want to process a route parameter and replace it with another one. For example when you're using models. This route `/users/{id}` would always hold the id of the requested user. Wouldn't it be cool if it would hold the user model instead?
 
 ```php
 $router = new Router();

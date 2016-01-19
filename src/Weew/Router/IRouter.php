@@ -82,6 +82,23 @@ interface IRouter {
     function createNestedRouter();
 
     /**
+     * @param $class
+     *
+     * @return IRouter
+     */
+    function setController($class);
+
+    /**
+     * @return string
+     */
+    function getController();
+
+    /**
+     * @return IRouter
+     */
+    function removeController();
+
+    /**
      * @param $name
      * @param $pattern
      *
