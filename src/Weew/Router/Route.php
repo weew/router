@@ -19,7 +19,7 @@ class Route implements IRoute {
     /**
      * @var mixed
      */
-    protected $value;
+    protected $handler;
 
     /**
      * @var array
@@ -29,16 +29,16 @@ class Route implements IRoute {
     /**
      * @param $method
      * @param $path
-     * @param $value
+     * @param $handler
      *
      * @throws Exception
      *
      * @see HttpRequestMethod
      */
-    public function __construct($method, $path, $value) {
+    public function __construct($method, $path, $handler) {
         $this->setMethod($method);
         $this->setPath($path);
-        $this->setValue($value);
+        $this->setHandler($handler);
     }
 
     /**
@@ -88,15 +88,15 @@ class Route implements IRoute {
     /**
      * @return mixed
      */
-    public function getValue() {
-        return $this->value;
+    public function getHandler() {
+        return $this->handler;
     }
 
     /**
-     * @param $value
+     * @param $handler
      */
-    public function setValue($value) {
-        $this->value = $value;
+    public function setHandler($handler) {
+        $this->handler = $handler;
     }
 
     /**
@@ -144,7 +144,7 @@ class Route implements IRoute {
         return [
             'method' => $this->getMethod(),
             'path' => $this->getPath(),
-            'value' => $this->getValue(),
+            'handler' => $this->getHandler(),
             'parameters' => $this->parameters,
         ];
     }

@@ -26,9 +26,9 @@ class RouteTest extends PHPUnit_Framework_TestCase {
 
     public function test_get_and_set_value() {
         $route = new Route(HttpRequestMethod::GET, 'foo', 'bar');
-        $this->assertEquals('bar', $route->getValue());
-        $route->setValue('foo');
-        $this->assertEquals('foo', $route->getValue());
+        $this->assertEquals('bar', $route->getHandler());
+        $route->setHandler('foo');
+        $this->assertEquals('foo', $route->getHandler());
     }
 
     public function test_to_array() {
@@ -38,7 +38,7 @@ class RouteTest extends PHPUnit_Framework_TestCase {
             [
                 'method' => HttpRequestMethod::GET,
                 'path' => '/foo',
-                'value' => 'bar',
+                'handler' => 'bar',
                 'parameters' => ['foo' => 'bar'],
             ],
             $route->toArray()

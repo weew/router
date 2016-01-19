@@ -30,12 +30,12 @@ interface IRoute extends IArrayable {
     /**
      * @return mixed
      */
-    function getValue();
+    function getHandler();
 
     /**
-     * @param $value
+     * @param $handler
      */
-    function setValue($value);
+    function setHandler($handler);
 
     /**
      * @return array

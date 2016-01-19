@@ -46,7 +46,7 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
 
         if ($match) {
             $this->assertTrue($route instanceof IRoute);
-            $this->assertEquals($expectedValue, $route->getValue());
+            $this->assertEquals($expectedValue, $route->getHandler());
             $this->assertEquals($expectedParameters, $route->getParameters());
         } else {
             $this->assertNull($route);
@@ -195,7 +195,7 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
 
     public function test_parameter_resolver_gets_invoked() {
         $routes = [
-            new Route(HttpRequestMethod::GET, 'foo/{item}/{id}', 'value'),
+            new Route(HttpRequestMethod::GET, 'foo/{item}/{id}', 'handler'),
         ];
         $matcher = new RoutesMatcher();
         $matcher->getParameterResolver()->addResolver('item', function($parameter) {

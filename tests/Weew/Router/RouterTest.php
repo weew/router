@@ -49,15 +49,15 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $router->options('options', '_options');
 
         $routes = $router->getRoutes();
-        $this->assertEquals('_get', array_shift($routes)->getValue());
-        $this->assertEquals('_get', array_shift($routes)->getValue());
-        $this->assertEquals('_head', array_shift($routes)->getValue());
-        $this->assertEquals('_post', array_shift($routes)->getValue());
-        $this->assertEquals('_put', array_shift($routes)->getValue());
-        $this->assertEquals('_update', array_shift($routes)->getValue());
-        $this->assertEquals('_patch', array_shift($routes)->getValue());
-        $this->assertEquals('_delete', array_shift($routes)->getValue());
-        $this->assertEquals('_options', array_shift($routes)->getValue());
+        $this->assertEquals('_get', array_shift($routes)->getHandler());
+        $this->assertEquals('_get', array_shift($routes)->getHandler());
+        $this->assertEquals('_head', array_shift($routes)->getHandler());
+        $this->assertEquals('_post', array_shift($routes)->getHandler());
+        $this->assertEquals('_put', array_shift($routes)->getHandler());
+        $this->assertEquals('_update', array_shift($routes)->getHandler());
+        $this->assertEquals('_patch', array_shift($routes)->getHandler());
+        $this->assertEquals('_delete', array_shift($routes)->getHandler());
+        $this->assertEquals('_options', array_shift($routes)->getHandler());
     }
 
     public function test_match() {
@@ -73,23 +73,23 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $this->assertNull($router->match(HttpRequestMethod::POST, new Url('home')));
         $route = $router->match(HttpRequestMethod::GET, new Url('home'));
         $this->assertTrue($route instanceof IRoute);
-        $this->assertEquals('home', $route->getValue());
+        $this->assertEquals('home', $route->getHandler());
         $this->assertEquals([], $route->getParameters());
 
         $this->assertNull($router->match(HttpRequestMethod::GET, new Url('items')));
         $route = $router->match(HttpRequestMethod::GET, new Url('items/_foo-bar'));
         $this->assertTrue($route instanceof IRoute);
-        $this->assertEquals('id', $route->getValue());
+        $this->assertEquals('id', $route->getHandler());
         $this->assertEquals(['id' => '_foo-bar'], $route->getParameters());
 
         $route = $router->match(HttpRequestMethod::GET, new Url('items/_foo-bar/slug'));
         $this->assertTrue($route instanceof IRoute);
-        $this->assertEquals('slug', $route->getValue());
+        $this->assertEquals('slug', $route->getHandler());
         $this->assertEquals(['id' => '_foo-bar', 'alias' => null], $route->getParameters());
 
         $route = $router->match(HttpRequestMethod::GET, new Url('items/_foo-bar/slug/bar'));
         $this->assertTrue($route instanceof IRoute);
-        $this->assertEquals('slug', $route->getValue());
+        $this->assertEquals('slug', $route->getHandler());
         $this->assertEquals(['id' => '_foo-bar', 'alias' => 'bar'], $route->getParameters());
     }
 
@@ -165,11 +165,11 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 
         $route = $router->match(HttpRequestMethod::GET, $url1);
         $this->assertNotNull($route);
-        $this->assertEquals('bar', $route->getValue());
+        $this->assertEquals('bar', $route->getHandler());
 
         $route = $router->match(HttpRequestMethod::GET, $url2);
         $this->assertNotNull($route);
-        $this->assertEquals('baz', $route->getValue());
+        $this->assertEquals('baz', $route->getHandler());
 
         $router->restrictTLD('y');
         $this->assertNull($router->match(HttpRequestMethod::GET, $url1));
@@ -202,11 +202,11 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 
         $route = $router->match(HttpRequestMethod::GET, new Url('api/v1/users'));
         $this->assertTrue($route instanceof IRoute);
-        $this->assertEquals('users', $route->getValue());
+        $this->assertEquals('users', $route->getHandler());
 
         $route = $router->match(HttpRequestMethod::GET, new Url('api/v1/posts'));
         $this->assertTrue($route instanceof IRoute);
-        $this->assertEquals('posts', $route->getValue());
+        $this->assertEquals('posts', $route->getHandler());
     }
 
     public function test_with_filters() {
@@ -291,7 +291,7 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 
         $route = $router->match(HttpRequestMethod::GET, new Url('profile'));
         $this->assertNotNull($route);
-        $this->assertEquals('unsecure', $route->getValue());
+        $this->assertEquals('unsecure', $route->getHandler());
     }
 
     public function test_that_exceptions_thrown_by_filters_do_not_get_swallowed() {
@@ -316,11 +316,11 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 
         $route = $router->match(HttpRequestMethod::HEAD, new Url('foo'));
         $this->assertNotNull($route);
-        $this->assertEquals('foo', $route->getValue());
+        $this->assertEquals('foo', $route->getHandler());
 
         $route = $router->match(HttpRequestMethod::HEAD, new Url('bar'));
         $this->assertNotNull($route);
-        $this->assertEquals('bar', $route->getValue());
+        $this->assertEquals('bar', $route->getHandler());
     }
 
     public function test_get_and_set_controller() {
@@ -345,7 +345,7 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(is_array($routes));
         $this->assertTrue(count($routes) > 0);
         $route = $routes[0];
-        $handler = $route->getValue();
+        $handler = $route->getHandler();
         $this->assertEquals(['foo', 'bar'], $handler);
     }
 

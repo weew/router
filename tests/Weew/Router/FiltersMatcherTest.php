@@ -50,7 +50,7 @@ class FiltersMatcherTest extends PHPUnit_Framework_TestCase {
         $matcher = new FiltersMatcher();
         $bar = 1;
         $matcher->addFilter('foo', function(IRoute $route) use (&$bar) {
-            $bar += $route->getValue();
+            $bar += $route->getHandler();
         });
         $matcher->enableFilters(['foo']);
         $matcher->applyFilters(new Route(HttpRequestMethod::GET, '', '5'));
@@ -59,7 +59,7 @@ class FiltersMatcherTest extends PHPUnit_Framework_TestCase {
 
     public function test_filter_gets_invoked() {
         $routes = [
-            new Route(HttpRequestMethod::GET, 'foo', 'value'),
+            new Route(HttpRequestMethod::GET, 'foo', 'handler'),
         ];
         $matcher = new RoutesMatcher();
         $matcher->getFiltersMatcher()->addFilter('foo', function() {
