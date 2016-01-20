@@ -28,6 +28,8 @@ class ParameterResolver implements IParameterResolver {
 
     /**
      * @param IRoute $route
+     *
+     * @return bool
      */
     public function resolveRouteParameters(IRoute $route) {
         $parameters = $route->getParameters();
@@ -36,11 +38,19 @@ class ParameterResolver implements IParameterResolver {
 
         foreach ($parameters as $name => $parameter) {
             if ($resolver = array_get($resolvers, $name)) {
-                $parameters[$name] = $invoker->invoke($resolver, $parameter);
+                $value = $invoker->invoke($resolver, $parameter);
+
+                if ($value === null) {
+                    return false;
+                }
+
+                $parameters[$name] = $value;
             }
         }
 
         $route->setParameters($parameters);
+
+        return true;
     }
 
     /**

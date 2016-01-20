@@ -10,6 +10,7 @@ use Weew\Router\Exceptions\FilterException;
 use Weew\Router\IRoute;
 use Weew\Router\IRouter;
 use Weew\Router\IRoutesMatcher;
+use Weew\Router\Route;
 use Weew\Router\Router;
 use Weew\Router\RoutesMatcher;
 use Weew\Url\Url;
@@ -354,5 +355,31 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $anotherRouter = $router->setController('foo', false);
         $this->assertTrue($router === $anotherRouter);
         $this->assertEquals('foo', $router->getController());
+    }
+
+    public function test_with_unresolved_parameter() {
+        $router = new Router();
+        $router->get('foo/{value}', function() {});
+        $route = $router->match(HttpRequestMethod::GET, new Url('foo/bar'));
+
+        $this->assertTrue($route instanceof IRoute);
+        $this->assertEquals('/foo/{value}', $route->getPath());
+
+        $router->addResolver('value', function() {
+            return null;
+        });
+
+        $route = $router->match(HttpRequestMethod::GET, new Url('foo/bar'));
+
+        $this->assertNull($route);
+
+        $router->addResolver('value', function() {
+            return true;
+        });
+
+        $route = $router->match(HttpRequestMethod::GET, new Url('foo/bar'));
+
+        $this->assertTrue($route instanceof IRoute);
+        $this->assertEquals('/foo/{value}', $route->getPath());
     }
 }

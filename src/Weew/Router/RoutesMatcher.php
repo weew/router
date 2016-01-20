@@ -68,10 +68,12 @@ class RoutesMatcher implements IRoutesMatcher {
 
         if ($route instanceof IRoute) {
             if ($this->getFiltersMatcher()->applyFilters($route)) {
-                $this->getParameterResolver()
+                $allParametersResolved = $this->getParameterResolver()
                     ->resolveRouteParameters($route);
 
-                return $route;
+                if ($allParametersResolved) {
+                    return $route;
+                }
             }
         }
 
