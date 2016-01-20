@@ -20,8 +20,7 @@
 - [Rules](#rules)
 - [Grouping routes](#grouping-routes)
 - [Complete example](#complete-example)
-- [Existing container integrations](#existing-container-integrations)
-- [Related projects](#related-projects)
+- [Extensions](#existing-container-integrations)
 
 ## Installation
 
@@ -272,15 +271,9 @@ if ($route instanceof IRoute) {
 }
 ```
 
-## Existing container integrations
+## Extensions
 
-There is an integration available for the [weew/php-container](https://github.com/weew/php-container) container. See [weew/php-router-container-aware](https://github.com/weew/php-router-container-aware).
+There are several extensions available:
 
-## Related Projects
-
-- [URL](https://github.com/weew/php-url): used throughout the project.
-- [HTTP Layer](https://github.com/weew/php-http): offers response and request objects,
-handles cookies, headers and much more.
-- [HTTP Blueprint](https://github.com/weew/php-http-blueprint): spin up a server,
-serve some content, shutdown the server.
-- [Dependency Injection Container](https://github.com/weew/php-container): Router works great together with this library.
+- [weew/php-router-container-aware](https://github.com/weew/php-router-container-aware)
+- [weew/php-router-entities-resolver](https://github.com/weew/php-router-entities-resolver)
