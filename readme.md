@@ -20,7 +20,7 @@
 - [Rules](#rules)
 - [Grouping routes](#grouping-routes)
 - [Complete example](#complete-example)
-- [Extensions](#existing-container-integrations)
+- [Extensions](#extensions)
 
 ## Installation
 
