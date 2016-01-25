@@ -3,7 +3,6 @@
 [![Build Status](https://img.shields.io/travis/weew/php-router.svg)](https://travis-ci.org/weew/php-router)
 [![Code Quality](https://img.shields.io/scrutinizer/g/weew/php-router.svg)](https://scrutinizer-ci.com/g/weew/php-router)
 [![Test Coverage](https://img.shields.io/coveralls/weew/php-router.svg)](https://coveralls.io/github/weew/php-router)
-[![Dependencies](https://img.shields.io/versioneye/d/php/weew:php-router.svg)](https://versioneye.com/php/weew:php-router)
 [![Version](https://img.shields.io/packagist/v/weew/php-router.svg)](https://packagist.org/packages/weew/php-router)
 [![Licence](https://img.shields.io/packagist/l/weew/php-router.svg)](https://packagist.org/packages/weew/php-router)
 

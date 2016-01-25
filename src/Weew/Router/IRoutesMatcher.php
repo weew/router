@@ -3,6 +3,7 @@
 namespace Weew\Router;
 
 use Weew\Url\IUrl;
+use Weew\UrlMatcher\IUrlMatcher;
 
 interface IRoutesMatcher {
     /**
@@ -17,20 +18,20 @@ interface IRoutesMatcher {
     function match(array $routes, $method, IUrl $url);
 
     /**
-     * @return array
-     */
-    function getPatterns();
-
-    /**
-     * @param array $patterns
-     */
-    function setPatterns(array $patterns);
-
-    /**
      * @param string $name
      * @param string $pattern
      */
     function addPattern($name, $pattern);
+
+    /**
+     * @return IUrlMatcher
+     */
+    function getUrlMatcher();
+
+    /**
+     * @param IUrlMatcher $urlMatcher
+     */
+    function setUrlMatcher(IUrlMatcher $urlMatcher);
 
     /**
      * @return IFiltersMatcher

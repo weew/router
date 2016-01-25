@@ -175,7 +175,7 @@ class RestrictionsMatcher implements IRestrictionsMatcher {
      *
      * @return bool
      */
-    public function matchRestrictions(IUrl $url) {
+    public function match(IUrl $url) {
         if ( ! $this->compareUrlToProtocols($url, $this->getProtocols()) ||
             ! $this->compareUrlToHosts($url, $this->getHosts()) ||
             ! $this->compareUrlToTLDs($url, $this->getTlds()) ||

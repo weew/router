@@ -60,5 +60,5 @@ interface IRestrictionsMatcher {
      *
      * @return bool
      */
-    function matchRestrictions(IUrl $url);
+    function match(IUrl $url);
 }

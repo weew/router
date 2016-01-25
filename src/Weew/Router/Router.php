@@ -9,7 +9,7 @@ use Weew\Url\IUrl;
 
 class Router implements IRouter {
     /**
-     * @var IRouter[]
+     * @var Router[]
      */
     protected $nestedRouters = [];
 

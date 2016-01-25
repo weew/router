@@ -10,7 +10,6 @@ use Weew\Router\Exceptions\FilterException;
 use Weew\Router\IRoute;
 use Weew\Router\IRouter;
 use Weew\Router\IRoutesMatcher;
-use Weew\Router\Route;
 use Weew\Router\Router;
 use Weew\Router\RoutesMatcher;
 use Weew\Url\Url;
