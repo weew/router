@@ -70,11 +70,20 @@ interface IRouter {
     function head($path, $abstract);
 
     /**
+     * @param $method
+     * @param $path
+     * @param $abstract
+     *
+     * @return IRouter
+     */
+    function route($method, $path, $abstract);
+
+    /**
      * @param callable $callback
      *
      * @return IRouter
      */
-    function group(callable $callback);
+    function group(callable $callback = null);
 
     /**
      * @return IRouter
@@ -130,11 +139,11 @@ interface IRouter {
     function addResolver($name, callable $resolver);
 
     /**
-     * @param $path
+     * @param $prefix
      *
      * @return IRouter
      */
-    function setBasePath($path);
+    function setPrefix($prefix);
 
     /**
      * @param $protocol

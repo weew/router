@@ -6,7 +6,7 @@ use Weew\Router\Exceptions\FilterNotFoundException;
 
 class FiltersMatcher implements IFiltersMatcher {
     /**
-     * @var array
+     * @var IRouteFilter[]
      */
     protected $filters = [];
 
@@ -33,12 +33,12 @@ class FiltersMatcher implements IFiltersMatcher {
      */
     public function applyFilters(IRoute $route) {
         foreach ($this->getFilters() as $filter) {
-            if ($filter['enabled']) {
+            if ($filter->isEnabled()) {
                 $invoker = $this->getFilterInvoker();
-                $result = $invoker->invoke($filter['filter'], $route);
+                $result = $invoker->invoke($filter->getFilter(), $route);
 
-                if ($result === false) {
-                    return false;
+                if (is_bool($result)) {
+                    return $result;
                 }
             }
         }
@@ -47,28 +47,28 @@ class FiltersMatcher implements IFiltersMatcher {
     }
 
     /**
-     * @return array
+     * @return IRouteFilter[]
      */
     public function getFilters() {
         return $this->filters;
     }
 
     /**
-     * @param array $filters
+     * @param IRouteFilter[] $filters
      */
     public function setFilters(array $filters) {
-        $this->filters = $filters;
+        $this->filters = [];
+
+        foreach ($filters as $filter) {
+            $this->addFilter($filter);
+        }
     }
 
     /**
-     * @param $name
-     * @param callable $filter
+     * @param IRouteFilter $filter
      */
-    public function addFilter($name, callable $filter) {
-        $this->filters[$name] = [
-            'filter' => $filter,
-            'enabled' => false,
-        ];
+    public function addFilter(IRouteFilter $filter) {
+        $this->filters[$filter->getName()] = $filter;
     }
 
     /**
@@ -80,14 +80,13 @@ class FiltersMatcher implements IFiltersMatcher {
         foreach ($names as $name) {
             $filter = array_get($this->filters, $name);
 
-            if ($filter === null) {
+            if ( ! $filter instanceof IRouteFilter) {
                 throw new FilterNotFoundException(
                     s('Filter with name %s not found.', $name)
                 );
             }
 
-            $filter['enabled'] = true;
-            $this->filters[$name] = $filter;
+            $filter->setEnabled(true);
         }
     }
 
@@ -103,6 +102,18 @@ class FiltersMatcher implements IFiltersMatcher {
      */
     public function setFilterInvoker(IFilterInvoker $filterInvoker) {
         $this->filterInvoker = $filterInvoker;
+    }
+
+    /**
+     * Clone filters matcher and all nested objects.
+     */
+    public function __clone() {
+        $filters = $this->getFilters();
+        $this->setFilters([]);
+
+        foreach ($filters as $filter) {
+            $this->addFilter(clone $filter);
+        }
     }
 
     /**

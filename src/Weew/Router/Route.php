@@ -7,9 +7,9 @@ use Weew\Http\HttpRequestMethod;
 
 class Route implements IRoute {
     /**
-     * @var string
+     * @var array
      */
-    protected $method;
+    protected $methods;
 
     /**
      * @var string
@@ -27,44 +27,46 @@ class Route implements IRoute {
     protected $parameters = [];
 
     /**
-     * @param $method
+     * Route constructor.
+     *
+     * @param array $methods
      * @param $path
      * @param $handler
      *
-     * @throws Exception
-     *
      * @see HttpRequestMethod
      */
-    public function __construct($method, $path, $handler) {
-        $this->setMethod($method);
+    public function __construct(array $methods, $path, $handler) {
+        $this->setMethods($methods);
         $this->setPath($path);
         $this->setHandler($handler);
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getMethod() {
-        return $this->method;
+    public function getMethods() {
+        return $this->methods;
     }
 
     /**
-     * @param $method
+     * @param array $methods
      *
      * @throws Exception
      * @see HttpRequestMethod
      */
-    public function setMethod($method) {
-        if ( ! HttpRequestMethod::isValid($method)) {
-            throw new Exception(
-                s(
-                    'Invalid request method %s. Valid methods are %s.',
-                    $method, implode(', ', HttpRequestMethod::getMethods())
-                )
-            );
+    public function setMethods(array $methods) {
+        foreach ($methods as $method) {
+            if ( ! HttpRequestMethod::isValid($method)) {
+                throw new Exception(
+                    s(
+                        'Invalid request method %s. Valid methods are %s.',
+                        $method, implode(', ', HttpRequestMethod::getMethods())
+                    )
+                );
+            }
         }
 
-        $this->method = $method;
+        $this->methods = $methods;
     }
 
     /**
@@ -142,7 +144,7 @@ class Route implements IRoute {
      */
     public function toArray() {
         return [
-            'method' => $this->getMethod(),
+            'methods' => $this->getMethods(),
             'path' => $this->getPath(),
             'handler' => $this->getHandler(),
             'parameters' => $this->parameters,

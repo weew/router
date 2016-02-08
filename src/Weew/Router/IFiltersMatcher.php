@@ -11,20 +11,19 @@ interface IFiltersMatcher {
     function applyFilters(IRoute $route);
 
     /**
-     * @return array
+     * @return IRouteFilter[]
      */
     function getFilters();
 
     /**
-     * @param array $filters
+     * @param IRouteFilter[] $filters
      */
     function setFilters(array $filters);
 
     /**
-     * @param $name
-     * @param callable $filter
+     * @param IRouteFilter $filter
      */
-    function addFilter($name, callable $filter);
+    function addFilter(IRouteFilter $filter);
 
     /**
      * @param $names

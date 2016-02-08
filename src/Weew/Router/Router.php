@@ -26,7 +26,7 @@ class Router implements IRouter {
     /**
      * @var string
      */
-    protected $basePath;
+    protected $prefix;
 
     /**
      * @var string
@@ -119,7 +119,7 @@ class Router implements IRouter {
      * @throws Exception
      */
     public function get($path, $abstract) {
-        return $this->createRoute(HttpRequestMethod::GET, $path, $abstract);
+        return $this->route(HttpRequestMethod::GET, $path, $abstract);
     }
 
     /**
@@ -130,7 +130,7 @@ class Router implements IRouter {
      * @throws Exception
      */
     public function post($path, $abstract) {
-        return $this->createRoute(HttpRequestMethod::POST, $path, $abstract);
+        return $this->route(HttpRequestMethod::POST, $path, $abstract);
     }
 
     /**
@@ -141,7 +141,7 @@ class Router implements IRouter {
      * @throws Exception
      */
     public function put($path, $abstract) {
-        return $this->createRoute(HttpRequestMethod::PUT, $path, $abstract);
+        return $this->route(HttpRequestMethod::PUT, $path, $abstract);
     }
 
     /**
@@ -152,7 +152,7 @@ class Router implements IRouter {
      * @throws Exception
      */
     public function update($path, $abstract) {
-        return $this->createRoute(HttpRequestMethod::UPDATE, $path, $abstract);
+        return $this->route(HttpRequestMethod::UPDATE, $path, $abstract);
     }
 
     /**
@@ -163,7 +163,7 @@ class Router implements IRouter {
      * @throws Exception
      */
     public function patch($path, $abstract) {
-        return $this->createRoute(HttpRequestMethod::PATCH, $path, $abstract);
+        return $this->route(HttpRequestMethod::PATCH, $path, $abstract);
     }
 
     /**
@@ -174,7 +174,7 @@ class Router implements IRouter {
      * @throws Exception
      */
     public function delete($path, $abstract) {
-        return $this->createRoute(HttpRequestMethod::DELETE, $path, $abstract);
+        return $this->route(HttpRequestMethod::DELETE, $path, $abstract);
     }
 
     /**
@@ -185,7 +185,7 @@ class Router implements IRouter {
      * @throws Exception
      */
     public function options($path, $abstract) {
-        return $this->createRoute(HttpRequestMethod::OPTIONS, $path, $abstract);
+        return $this->route(HttpRequestMethod::OPTIONS, $path, $abstract);
     }
 
     /**
@@ -195,7 +195,18 @@ class Router implements IRouter {
      * @return Router
      */
     public function head($path, $abstract) {
-        return $this->createRoute(HttpRequestMethod::HEAD, $path, $abstract);
+        return $this->route(HttpRequestMethod::HEAD, $path, $abstract);
+    }
+
+    /**
+     * @param $method
+     * @param $path
+     * @param $abstract
+     *
+     * @return Router
+     */
+    public function route($method, $path, $abstract) {
+        return $this->createRoute($method, $path, $abstract);
     }
 
     /**
@@ -203,9 +214,12 @@ class Router implements IRouter {
      *
      * @return $this
      */
-    public function group(callable $callable) {
+    public function group(callable $callable = null) {
         $router = $this->createNestedRouter();
-        $this->invokeCallable($callable, $router);
+
+        if ($callable !== null) {
+            $this->invokeCallable($callable, $router);
+        }
 
         return $this;
     }
@@ -229,8 +243,9 @@ class Router implements IRouter {
      * @return $this
      */
     public function addFilter($name, callable $callable) {
+        $filter = new RouteFilter($name, $callable);
         $this->getRoutesMatcher()->getFiltersMatcher()
-            ->addFilter($name, $callable);
+            ->addFilter($filter);
 
         return $this;
     }
@@ -265,12 +280,12 @@ class Router implements IRouter {
     }
 
     /**
-     * @param $basePath
+     * @param $prefix
      *
      * @return $this
      */
-    public function setBasePath($basePath) {
-        $this->basePath = $basePath;
+    public function setPrefix($prefix) {
+        $this->prefix = $prefix;
 
         return $this;
     }
@@ -388,7 +403,8 @@ class Router implements IRouter {
      */
     public function createNestedRouter() {
         $router = $this->createRouter();
-        $router->setBasePath($this->basePath);
+        $router->setPrefix($this->prefix);
+        $router->setController($this->controller, false);
         $router->setRoutesMatcher(clone $router->getRoutesMatcher());
         $this->addNestedRouter($router);
 
@@ -481,17 +497,17 @@ class Router implements IRouter {
      * @throws Exception
      */
     protected function createRoute($method, $path, $abstract) {
-        if ($this->basePath !== null) {
-            $path = url($this->basePath, $path);
+        if ($this->prefix !== null) {
+            $path = url($this->prefix, $path);
+        }
+
+        if ( ! is_array($method)) {
+            $method = [$method];
         }
 
         $handler = $this->createHandler($abstract);
         $route = new Route($method, $path, $handler);
         $this->routes[] = $route;
-
-        if ($method == HttpRequestMethod::GET) {
-            $this->createRoute(HttpRequestMethod::HEAD, $path, $handler);
-        }
 
         return $this;
     }

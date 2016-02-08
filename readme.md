@@ -119,15 +119,26 @@ $router
 
 ## Firewalls
 
-It is very easy to protect routes with custom filters.
+It is very easy to protect routes with custom filters. In general, if a single filter fails (returns `false` or throws an exception), no further filters will be called. Same goes the other way around. If a filter explicitly says that everything is ok (returns `true`), no further filters will be called.
 
 ```php
 $router = new Router();
 $router->addFilter('auth', function(IRoute $route) {
-    return false; // not authenticated
+    // returning false indicates that filter has failed, no other filters will be called
+    return false;
+});
+
+$router->addFilter('guest', function(IRoute $route) {
+    // explicitly returning true indicates that this route is ok, no other filters will be called
+    return true;
 });
 
 $router->enableFilter('auth');
+$router->enableFilter('guest');
+
+// or
+
+ $router->enableFilter(['auth', 'guest']);
 ```
 
 A filter has to return a boolean value to indicate whether the affected routes are good to go or rather should be ignored. Filter work best with groups, see below.
@@ -225,7 +236,7 @@ $router->addResolver('user', function($id) {
 });
 
 $router->group(function(IRouter $router) {
-    $router->setBasePath('api/v1');
+    $router->setPrefix('api/v1');
     $router->restrictProtocol('https');
     $router->restrictSubdomain('api');
     $router->enableFilter('auth');
@@ -240,7 +251,7 @@ $router->group(function(IRouter $router) {
 });
 
 $router->group(function(IRouter $router) {
-    $router->setBasePath('api/v2');
+    $router->setPrefix('api/v2');
     $router->addPattern('id', '[a-zA-Z]+');
 
     $router->get('users/{user}/{alias?}', function(IRoute $route) {

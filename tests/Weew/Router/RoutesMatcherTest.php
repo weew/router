@@ -55,7 +55,7 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
     }
 
     public function test_compare_route_to_method() {
-        $route = new Route(HttpRequestMethod::GET, 'foo', 'bar');
+        $route = new Route([HttpRequestMethod::GET], 'foo', 'bar');
         $matcher = new RoutesMatcher();
         $this->assertTrue(
             $matcher->compareRouteToMethod($route, HttpRequestMethod::GET)
@@ -67,7 +67,7 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
 
     public function test_add_pattern() {
         $routes = [
-            new Route(HttpRequestMethod::GET, 'foo/{id}/{slug}', 'foo')
+            new Route([HttpRequestMethod::GET], 'foo/{id}/{slug}', 'foo')
         ];
         $matcher = new RoutesMatcher();
         $this->assertNotNull(
@@ -96,7 +96,7 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
     public function test_match_advanced_routes() {
         $matcher = new RoutesMatcher();
         $url = new Url('http://foo.bar.baz/foo');
-        $route = new Route(HttpRequestMethod::GET, '/foo', 'foo');
+        $route = new Route([HttpRequestMethod::GET], '/foo', 'foo');
 
         $this->assertNotNull($matcher->match([$route], HttpRequestMethod::GET, $url));
 
@@ -128,7 +128,7 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
 
     public function test_parameter_resolver_gets_invoked() {
         $routes = [
-            new Route(HttpRequestMethod::GET, 'foo/{item}/{id}', 'handler'),
+            new Route([HttpRequestMethod::GET], 'foo/{item}/{id}', 'handler'),
         ];
         $matcher = new RoutesMatcher();
         $matcher->getParameterResolver()->addResolver('item', function($parameter) {

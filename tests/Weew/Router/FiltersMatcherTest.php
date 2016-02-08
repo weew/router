@@ -7,7 +7,9 @@ use Weew\Http\HttpRequestMethod;
 use Weew\Router\Exceptions\FilterNotFoundException;
 use Weew\Router\FiltersMatcher;
 use Weew\Router\IRoute;
+use Weew\Router\IRouteFilter;
 use Weew\Router\Route;
+use Weew\Router\RouteFilter;
 use Weew\Router\RoutesMatcher;
 use Weew\Url\Url;
 
@@ -22,22 +24,25 @@ class FiltersMatcherTest extends PHPUnit_Framework_TestCase {
 
     public function test_add_filter() {
         $matcher = new FiltersMatcher();
-        $matcher->addFilter('foo', function() {return 1;});
+        $filter = new RouteFilter('foo', function() {return 1;});
+        $matcher->addFilter($filter);
         $filters = $matcher->getFilters();
         $this->assertEquals(1, count($filters));
-        $this->assertNotNull($filters['foo']);
-        $this->assertEquals(1, $filters['foo']['filter']());
-        $this->assertFalse($filters['foo']['enabled']);
+        $this->assertTrue($filters['foo'] instanceof IRouteFilter);
+        $cb = $filters['foo']->getFilter();
+        $this->assertEquals(1, $cb());
+        $this->assertFalse($filters['foo']->isEnabled());
     }
 
     public function test_enable_filter() {
         $matcher = new FiltersMatcher();
-        $matcher->addFilter('foo', function() {return 1;});
+        $filter = new RouteFilter('foo', function() {return 1;});
+        $matcher->addFilter($filter);
         $filters = $matcher->getFilters();
-        $this->assertFalse($filters['foo']['enabled']);
+        $this->assertFalse($filters['foo']->isEnabled());
         $matcher->enableFilters(['foo']);
         $filters = $matcher->getFilters();
-        $this->assertTrue($filters['foo']['enabled']);
+        $this->assertTrue($filters['foo']->isEnabled());
     }
 
     public function test_enable_invalid_filter() {
@@ -49,22 +54,24 @@ class FiltersMatcherTest extends PHPUnit_Framework_TestCase {
     public function test_route_gets_passed_to_filter() {
         $matcher = new FiltersMatcher();
         $bar = 1;
-        $matcher->addFilter('foo', function(IRoute $route) use (&$bar) {
+        $filter = new RouteFilter('foo', function(IRoute $route) use (&$bar) {
             $bar += $route->getHandler();
         });
+        $matcher->addFilter($filter);
         $matcher->enableFilters(['foo']);
-        $matcher->applyFilters(new Route(HttpRequestMethod::GET, '', '5'));
+        $matcher->applyFilters(new Route([HttpRequestMethod::GET], '', '5'));
         $this->assertEquals(6, $bar);
     }
 
     public function test_filter_gets_invoked() {
         $routes = [
-            new Route(HttpRequestMethod::GET, 'foo', 'handler'),
+            new Route([HttpRequestMethod::GET], 'foo', 'handler'),
         ];
-        $matcher = new RoutesMatcher();
-        $matcher->getFiltersMatcher()->addFilter('foo', function() {
+        $filter = new RouteFilter('foo', function() {
             return true;
         });
+        $matcher = new RoutesMatcher();
+        $matcher->getFiltersMatcher()->addFilter($filter);
 
         $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
         $this->assertNotNull($route);
@@ -73,14 +80,26 @@ class FiltersMatcherTest extends PHPUnit_Framework_TestCase {
         $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
         $this->assertNotNull($route);
 
-        $matcher->getFiltersMatcher()->addFilter('foo', function() {
+        $filter = new RouteFilter('foo', function() {
             return false;
         });
+        $matcher->getFiltersMatcher()->addFilter($filter);
         $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
         $this->assertNotNull($route);
 
         $matcher->getFiltersMatcher()->enableFilters(['foo']);
         $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo'));
         $this->assertNull($route);
+    }
+
+    public function test_set_filters() {
+        $matcher = new FiltersMatcher();
+        $filters = [
+            'foo' => new RouteFilter('foo', function() {}),
+            'bar' => new RouteFilter('bar', function() {}),
+        ];
+        $matcher->setFilters($filters);
+
+        $this->assertTrue($matcher->getFilters() === $filters);
     }
 }

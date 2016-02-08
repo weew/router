@@ -6,16 +6,16 @@ use Weew\Contracts\IArrayable;
 
 interface IRoute extends IArrayable {
     /**
-     * @return string
+     * @return array
      */
-    function getMethod();
+    function getMethods();
 
     /**
-     * @param $method
+     * @param array $methods
      *
      * @see HttpRequestMethod
      */
-    function setMethod($method);
+    function setMethods(array $methods);
 
     /**
      * @return string

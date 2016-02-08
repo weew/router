@@ -50,7 +50,6 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 
         $routes = $router->getRoutes();
         $this->assertEquals('_get', array_shift($routes)->getHandler());
-        $this->assertEquals('_get', array_shift($routes)->getHandler());
         $this->assertEquals('_head', array_shift($routes)->getHandler());
         $this->assertEquals('_post', array_shift($routes)->getHandler());
         $this->assertEquals('_put', array_shift($routes)->getHandler());
@@ -194,7 +193,7 @@ class RouterTest extends PHPUnit_Framework_TestCase {
 
     public function test_set_base_path() {
         $router = new Router();
-        $router->setBasePath('api/v1');
+        $router->setPrefix('api/v1');
         $router->get('users', 'users');
         $router->group(function(IRouter $router) {
             $router->get('posts', 'posts');
@@ -212,9 +211,10 @@ class RouterTest extends PHPUnit_Framework_TestCase {
     public function test_with_filters() {
         $router = new Router();
         $router->get('users', 'users');
-        $router->addFilter('foo', function() {
+        $router->addFilter('baz', function() {
             return true;
         });
+        $router->addFilter('foo', function() {});
         $router->enableFilter('foo');
         $route = $router->match(HttpRequestMethod::GET, new Url('users'));
         $this->assertNotNull($route);
@@ -225,6 +225,10 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $router->enableFilter(['bar']);
         $route = $router->match(HttpRequestMethod::GET, new Url('users'));
         $this->assertNull($route);
+
+        $router->enableFilter('baz');
+        $route = $router->match(HttpRequestMethod::GET, new Url('users'));
+        $this->assertNotNull($route);
     }
 
     public function test_with_resolvers() {

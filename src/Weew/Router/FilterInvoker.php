@@ -10,6 +10,6 @@ class FilterInvoker implements IFilterInvoker {
      * @return bool
      */
     public function invoke(callable $filter, IRoute $route) {
-        return !! $filter($route);
+        return $filter($route);
     }
 }

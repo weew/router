@@ -2,6 +2,7 @@
 
 namespace Weew\Router;
 
+use Weew\Http\HttpRequestMethod;
 use Weew\Url\IUrl;
 use Weew\UrlMatcher\IUrlMatcher;
 use Weew\UrlMatcher\UrlMatcher;
@@ -84,6 +85,10 @@ class RoutesMatcher implements IRoutesMatcher {
             }
         }
 
+        if ($method === HttpRequestMethod::HEAD) {
+            return $this->match($routes, HttpRequestMethod::GET, $url);
+        }
+
         return null;
     }
 
@@ -158,7 +163,7 @@ class RoutesMatcher implements IRoutesMatcher {
      * @return bool
      */
     public function compareRouteToMethod(IRoute $route, $method) {
-        return $route->getMethod() == $method;
+        return in_array($method, $route->getMethods());
     }
 
     /**
@@ -170,6 +175,9 @@ class RoutesMatcher implements IRoutesMatcher {
         );
         $this->setRestrictionsMatcher(
             clone $this->getRestrictionsMatcher()
+        );
+        $this->setFiltersMatcher(
+            clone $this->getFiltersMatcher()
         );
         $this->setFiltersMatcher(
             clone $this->getFiltersMatcher()
