@@ -95,7 +95,7 @@ $router->get('home/{greeting?}', 'home');
 $route = $router->match(HttpRequestMethod::GET, new Url('home/hello-there'));
 
 if ( ! $route === null) {
-    echo $route->getValue();
+    echo $route->getHandler();
     // home
     echo $route->getParameter('greeting');
     // hello-there
@@ -269,7 +269,7 @@ $route = $router->match($request->getMethod(), $request->getUrl());
 
 // create a response based on the route
 if ($route instanceof IRoute) {
-    $abstract = $route->getValue();
+    $abstract = $route->getHandler();
 
     if (is_callable($abstract)) {
         $abstract($route);
