@@ -212,7 +212,7 @@ class Router implements IRouter {
     /**
      * @param callable $callable
      *
-     * @return $this
+     * @return IRouter
      */
     public function group(callable $callable = null) {
         $router = $this->createNestedRouter();
@@ -221,7 +221,7 @@ class Router implements IRouter {
             $this->invokeCallable($callable, $router);
         }
 
-        return $this;
+        return $router;
     }
 
     /**

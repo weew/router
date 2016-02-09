@@ -4,7 +4,9 @@ namespace Tests\Weew\Router;
 
 use PHPUnit_Framework_TestCase;
 use Weew\Http\HttpRequestMethod;
+use Weew\Router\IRouter;
 use Weew\Router\Route;
+use Weew\Router\Router;
 
 class RouteTest extends PHPUnit_Framework_TestCase {
     public function test_get_and_set_method() {
@@ -53,5 +55,12 @@ class RouteTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('swag', $route->getParameter('yolo', 'swag'));
         $route->setParameter('yolo', 'swag');
         $this->assertEquals('swag', $route->getParameter('yolo'));
+    }
+
+    public function test_group() {
+        $router = new Router();
+        $anotherRouter = $router->group();
+        $this->assertTrue($anotherRouter instanceof IRouter);
+        $this->assertTrue($router !== $anotherRouter);
     }
 }
