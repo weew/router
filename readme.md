@@ -288,3 +288,4 @@ There are several extensions available:
 - [weew/php-router-container-aware](https://github.com/weew/php-router-container-aware)
 - [weew/php-router-entities-resolver](https://github.com/weew/php-router-entities-resolver)
 - [weew/php-router-routes-invoker-container-aware](https://github.com/weew/php-router-routes-invoker-container-aware)
+- [weew/php-router-configurator](https://github.com/weew/php-router-configurator)
