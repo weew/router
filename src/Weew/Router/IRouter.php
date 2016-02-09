@@ -92,10 +92,11 @@ interface IRouter {
 
     /**
      * @param $class
+     * @param bool $nest
      *
      * @return IRouter
      */
-    function setController($class);
+    function setController($class, $nest = true);
 
     /**
      * @return string
