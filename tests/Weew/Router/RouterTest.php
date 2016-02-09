@@ -385,4 +385,18 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue($route instanceof IRoute);
         $this->assertEquals('/foo/{value}', $route->getPath());
     }
+
+    public function test_add_resolver() {
+        $router = new Router();
+        $router->addResolver('foo', [self::class, 'test_add_resolver']);
+        $resolvers = $router->getRoutesMatcher()->getParameterResolver()->getResolvers();
+        $this->assertEquals(1, count($resolvers));
+    }
+
+    public function test_add_filter() {
+        $router = new Router();
+        $router->addFilter('foo', [self::class, 'test_add_filter']);
+        $filters = $router->getRoutesMatcher()->getFiltersMatcher()->getFilters();
+        $this->assertEquals(1, count($filters));
+    }
 }

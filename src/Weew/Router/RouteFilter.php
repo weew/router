@@ -2,6 +2,8 @@
 
 namespace Weew\Router;
 
+use Weew\Router\Exceptions\InvalidFilterException;
+
 class RouteFilter implements IRouteFilter {
     /**
      * @var string
@@ -22,12 +24,12 @@ class RouteFilter implements IRouteFilter {
      * RouteFilter constructor.
      *
      * @param $name
-     * @param callable $filter
+     * @param $callable
      * @param bool $enabled
      */
-    public function __construct($name, callable $filter, $enabled = false) {
+    public function __construct($name, $callable, $enabled = false) {
         $this->setName($name);
-        $this->setFilter($filter);
+        $this->setFilter($callable);
         $this->setEnabled($enabled);
     }
 
@@ -53,10 +55,18 @@ class RouteFilter implements IRouteFilter {
     }
 
     /**
-     * @param callable $filter
+     * @param $callable
+     *
+     * @throws InvalidFilterException
      */
-    public function setFilter(callable $filter) {
-        $this->filter = $filter;
+    public function setFilter($callable) {
+        if ( ! is_callable($callable)) {
+            throw new InvalidFilterException(s(
+                'Routing filter must be a callable, received "%s".', get_type($callable)
+            ));
+        }
+
+        $this->filter = $callable;
     }
 
     /**

@@ -9,20 +9,19 @@ interface IParameterResolver {
     function resolveRouteParameters(IRoute $route);
 
     /**
-     * @return array
+     * @return IRouteResolver[]
      */
     function getResolvers();
 
     /**
-     * @param array $resolvers
+     * @param IRouteResolver[] $resolvers
      */
     function setResolvers(array $resolvers);
 
     /**
-     * @param $name
-     * @param callable $resolver
+     * @param IRouteResolver $resolver
      */
-    function addResolver($name, callable $resolver);
+    function addResolver(IRouteResolver $resolver);
 
     /**
      * @return IParameterResolverInvoker

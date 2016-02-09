@@ -7,6 +7,7 @@ use Weew\Http\HttpRequestMethod;
 use Weew\Router\IRoute;
 use Weew\Router\Route;
 use Weew\Router\Router;
+use Weew\Router\RouteResolver;
 use Weew\Router\RoutesMatcher;
 use Weew\Url\Url;
 use Weew\UrlMatcher\IUrlMatcher;
@@ -131,9 +132,10 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
             new Route([HttpRequestMethod::GET], 'foo/{item}/{id}', 'handler'),
         ];
         $matcher = new RoutesMatcher();
-        $matcher->getParameterResolver()->addResolver('item', function($parameter) {
+        $resolver = new RouteResolver('item', function($parameter) {
             return $parameter + 1;
         });
+        $matcher->getParameterResolver()->addResolver($resolver);
         $route = $matcher->match($routes, HttpRequestMethod::GET, new Url('foo/10/20'));
 
         $this->assertNotNull($route);

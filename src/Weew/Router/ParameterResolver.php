@@ -4,9 +4,9 @@ namespace Weew\Router;
 
 class ParameterResolver implements IParameterResolver {
     /**
-     * @var array
+     * @var IRouteResolver[]
      */
-    protected $parameterResolvers = [];
+    protected $resolvers = [];
 
     /**
      * @var IParameterResolverInvoker
@@ -37,8 +37,10 @@ class ParameterResolver implements IParameterResolver {
         $invoker = $this->getParameterResolverInvoker();
 
         foreach ($parameters as $name => $parameter) {
-            if ($resolver = array_get($resolvers, $name)) {
-                $value = $invoker->invoke($resolver, $parameter);
+            $resolver = array_get($resolvers, $name);
+
+            if ($resolver instanceof IRouteResolver) {
+                $value = $invoker->invoke($resolver->getResolver(), $parameter);
 
                 if ($value === null) {
                     return false;
@@ -54,25 +56,28 @@ class ParameterResolver implements IParameterResolver {
     }
 
     /**
-     * @return array
+     * @return IRouteResolver[]
      */
     public function getResolvers() {
-        return $this->parameterResolvers;
+        return $this->resolvers;
     }
 
     /**
-     * @param array $resolvers
+     * @param IRouteResolver[] $resolvers
      */
     public function setResolvers(array $resolvers) {
-        $this->parameterResolvers = $resolvers;
+        $this->resolvers = [];
+
+        foreach ($resolvers as $resolver) {
+            $this->addResolver($resolver);
+        }
     }
 
     /**
-     * @param $name
-     * @param callable $resolver
+     * @param IRouteResolver $resolver
      */
-    public function addResolver($name, callable $resolver) {
-        $this->parameterResolvers[$name] = $resolver;
+    public function addResolver(IRouteResolver $resolver) {
+        $this->resolvers[$resolver->getName()] = $resolver;
     }
 
     /**

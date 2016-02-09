@@ -19,9 +19,9 @@ interface IRouteFilter {
     function getFilter();
 
     /**
-     * @param callable $filter
+     * @param $callable
      */
-    function setFilter(callable $filter);
+    function setFilter($callable);
 
     /**
      * @param bool $enabled

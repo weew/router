@@ -117,11 +117,11 @@ interface IRouter {
 
     /**
      * @param $name
-     * @param callable $callable
+     * @param $callable
      *
      * @return IRouter
      */
-    function addFilter($name, callable $callable);
+    function addFilter($name, $callable);
 
     /**
      * @param $name
@@ -132,11 +132,11 @@ interface IRouter {
 
     /**
      * @param $name
-     * @param callable $resolver
+     * @param callable $callable
      *
      * @return IRouter
      */
-    function addResolver($name, callable $resolver);
+    function addResolver($name, $callable);
 
     /**
      * @param $prefix

@@ -3,6 +3,7 @@
 namespace Tests\Weew\Router;
 
 use PHPUnit_Framework_TestCase;
+use Weew\Router\Exceptions\InvalidFilterException;
 use Weew\Router\RouteFilter;
 
 class RouteFilterTest extends PHPUnit_Framework_TestCase {
@@ -13,5 +14,10 @@ class RouteFilterTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('foo', $filter->getName());
         $this->assertTrue($filter->getFilter() === $cb);
         $this->assertTrue($filter->isEnabled());
+    }
+
+    public function test_set_invalid_filter() {
+        $this->setExpectedException(InvalidFilterException::class);
+        new RouteFilter('foo', 'bar');
     }
 }

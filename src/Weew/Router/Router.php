@@ -238,11 +238,11 @@ class Router implements IRouter {
 
     /**
      * @param $name
-     * @param callable $callable
+     * @param $callable
      *
      * @return $this
      */
-    public function addFilter($name, callable $callable) {
+    public function addFilter($name, $callable) {
         $filter = new RouteFilter($name, $callable);
         $this->getRoutesMatcher()->getFiltersMatcher()
             ->addFilter($filter);
@@ -268,13 +268,14 @@ class Router implements IRouter {
 
     /**
      * @param $name
-     * @param callable $resolver
+     * @param callable $callable
      *
      * @return $this
      */
-    public function addResolver($name, callable $resolver) {
+    public function addResolver($name, $callable) {
+        $resolver = new RouteResolver($name, $callable);
         $this->getRoutesMatcher()->getParameterResolver()
-            ->addResolver($name, $resolver);
+            ->addResolver($resolver);
 
         return $this;
     }
