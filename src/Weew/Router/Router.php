@@ -281,6 +281,13 @@ class Router implements IRouter {
     }
 
     /**
+     * @return string
+     */
+    public function getPrefix() {
+        return $this->prefix;
+    }
+
+    /**
      * @param $prefix
      *
      * @return $this
@@ -404,7 +411,7 @@ class Router implements IRouter {
      */
     public function createNestedRouter() {
         $router = $this->createRouter();
-        $router->setPrefix($this->prefix);
+        $router->setPrefix($this->getPrefix());
         $router->setController($this->controller, false);
         $router->setRoutesMatcher(clone $router->getRoutesMatcher());
         $this->addNestedRouter($router);
@@ -498,8 +505,8 @@ class Router implements IRouter {
      * @throws Exception
      */
     protected function createRoute($method, $path, $abstract) {
-        if ($this->prefix !== null) {
-            $path = url($this->prefix, $path);
+        if ($this->getPrefix() !== null) {
+            $path = url($this->getPrefix(), $path);
         }
 
         if ( ! is_array($method)) {

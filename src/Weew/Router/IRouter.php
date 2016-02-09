@@ -139,6 +139,11 @@ interface IRouter {
     function addResolver($name, $callable);
 
     /**
+     * @return string
+     */
+    function getPrefix();
+
+    /**
      * @param $prefix
      *
      * @return IRouter
