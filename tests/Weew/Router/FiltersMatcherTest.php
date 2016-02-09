@@ -55,7 +55,7 @@ class FiltersMatcherTest extends PHPUnit_Framework_TestCase {
         $matcher = new FiltersMatcher();
         $bar = 1;
         $filter = new RouteFilter('foo', function(IRoute $route) use (&$bar) {
-            $bar += $route->getHandler();
+            $bar += $route->getAction();
         });
         $matcher->addFilter($filter);
         $matcher->enableFilters(['foo']);

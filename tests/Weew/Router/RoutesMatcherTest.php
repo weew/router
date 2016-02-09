@@ -48,7 +48,7 @@ class RoutesMatcherTest extends PHPUnit_Framework_TestCase {
 
         if ($match) {
             $this->assertTrue($route instanceof IRoute);
-            $this->assertEquals($expectedValue, $route->getHandler());
+            $this->assertEquals($expectedValue, $route->getAction());
             $this->assertEquals($expectedParameters, $route->getParameters());
         } else {
             $this->assertNull($route);
