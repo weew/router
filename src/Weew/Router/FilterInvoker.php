@@ -4,12 +4,12 @@ namespace Weew\Router;
 
 class FilterInvoker implements IFilterInvoker {
     /**
-     * @param callable $filter
+     * @param $filter
      * @param IRoute $route
      *
      * @return bool
      */
-    public function invoke(callable $filter, IRoute $route) {
+    public function invoke($filter, IRoute $route) {
         return $filter($route);
     }
 }

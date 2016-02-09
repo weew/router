@@ -4,10 +4,10 @@ namespace Weew\Router;
 
 interface IFilterInvoker {
     /**
-     * @param callable $filter
+     * @param $filter
      * @param IRoute $route
      *
      * @return bool
      */
-    function invoke(callable $filter, IRoute $route);
+    function invoke($filter, IRoute $route);
 }
