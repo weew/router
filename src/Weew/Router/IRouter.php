@@ -152,6 +152,13 @@ interface IRouter {
     function setPrefix($prefix);
 
     /**
+     * @param $prefix
+     *
+     * @return IRouter
+     */
+    function addPrefix($prefix);
+
+    /**
      * @param $protocol
      *
      * @return IRouter

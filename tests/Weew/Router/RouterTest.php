@@ -191,7 +191,7 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $this->assertNotNull($router->match(HttpRequestMethod::GET, $url1));
     }
 
-    public function test_set_base_path() {
+    public function test_set_prefix() {
         $router = new Router();
         $router->setPrefix('api/v1');
         $router->get('users', 'users');
@@ -206,6 +206,15 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $route = $router->match(HttpRequestMethod::GET, new Url('api/v1/posts'));
         $this->assertTrue($route instanceof IRoute);
         $this->assertEquals('posts', $route->getAction());
+    }
+
+    public function test_add_prefix() {
+        $router = new Router();
+        $this->assertTrue($router->addPrefix('foo') === $router);
+        $this->assertEquals('foo', $router->getPrefix());
+
+        $router->addPrefix('bar');
+        $this->assertEquals('foo/bar', $router->getPrefix());
     }
 
     public function test_with_filters() {

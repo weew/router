@@ -299,6 +299,21 @@ class Router implements IRouter {
     }
 
     /**
+     * @param $prefix
+     *
+     * @return $this
+     */
+    public function addPrefix($prefix) {
+        if ($this->getPrefix() !== null) {
+            $this->setPrefix(url($this->getPrefix(), $prefix));
+        } else {
+            $this->setPrefix($prefix);
+        }
+
+        return $this;
+    }
+
+    /**
      * @param $protocol
      *
      * @return $this
