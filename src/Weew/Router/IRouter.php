@@ -91,6 +91,11 @@ interface IRouter {
     function createNestedRouter();
 
     /**
+     * @return IRouter[]
+     */
+    function getNestedRouters();
+
+    /**
      * @param $class
      * @param bool $nest
      *

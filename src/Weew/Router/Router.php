@@ -435,6 +435,13 @@ class Router implements IRouter {
     }
 
     /**
+     * @return IRouter[]
+     */
+    public function getNestedRouters() {
+        return $this->nestedRouters;
+    }
+
+    /**
      * @return ICallableInvoker
      */
     public function getCallableInvoker() {
@@ -492,7 +499,7 @@ class Router implements IRouter {
         array &$exceptions,
         IRoute $route = null
     ) {
-        foreach ($this->nestedRouters as $router) {
+        foreach ($this->getNestedRouters() as $router) {
             $match = $router->matchRouter($method, $url, $exceptions, $route);
 
             if ($match !== null) {
