@@ -111,7 +111,7 @@ class RestrictionsMatcher implements IRestrictionsMatcher {
             return true;
         }
 
-        return in_array($url->getProtocol(), $protocols);
+        return array_contains($protocols, $url->getProtocol());
     }
 
     /**
@@ -125,7 +125,7 @@ class RestrictionsMatcher implements IRestrictionsMatcher {
             return true;
         }
 
-        return in_array($url->getHost(), $hosts);
+        return array_contains($hosts, $url->getHost());
     }
 
     /**
@@ -139,7 +139,7 @@ class RestrictionsMatcher implements IRestrictionsMatcher {
             return true;
         }
 
-        return in_array($url->getTLD(), $tlds);
+        return array_contains($tlds, $url->getTLD());
     }
 
     /**
@@ -153,7 +153,7 @@ class RestrictionsMatcher implements IRestrictionsMatcher {
             return true;
         }
 
-        return in_array($url->getDomain(), $domains);
+        return array_contains($domains, $url->getDomain());
     }
 
     /**
@@ -167,7 +167,7 @@ class RestrictionsMatcher implements IRestrictionsMatcher {
             return true;
         }
 
-        return in_array($url->getSubdomain(), $subdomains);
+        return array_contains($subdomains, $url->getSubdomain());
     }
 
     /**

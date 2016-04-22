@@ -163,7 +163,7 @@ class RoutesMatcher implements IRoutesMatcher {
      * @return bool
      */
     public function compareRouteToMethod(IRoute $route, $method) {
-        return in_array($method, $route->getMethods());
+        return array_contains($route->getMethods(), $method);
     }
 
     /**
