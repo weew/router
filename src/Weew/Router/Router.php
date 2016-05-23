@@ -199,6 +199,23 @@ class Router implements IRouter {
     }
 
     /**
+     * @param $path
+     * @param $abstract
+     *
+     * @return Router
+     */
+    public function any($path, $abstract) {
+        return $this->createRoute([
+            HttpRequestMethod::GET,
+            HttpRequestMethod::POST,
+            HttpRequestMethod::PUT,
+            HttpRequestMethod::PATCH,
+            HttpRequestMethod::UPDATE,
+            HttpRequestMethod::DELETE,
+        ], $path, $abstract);
+    }
+
+    /**
      * @param $method
      * @param $path
      * @param $abstract
@@ -208,6 +225,7 @@ class Router implements IRouter {
     public function route($method, $path, $abstract) {
         return $this->createRoute($method, $path, $abstract);
     }
+
 
     /**
      * @param callable $callable

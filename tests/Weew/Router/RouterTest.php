@@ -408,4 +408,23 @@ class RouterTest extends PHPUnit_Framework_TestCase {
         $filters = $router->getRoutesMatcher()->getFiltersMatcher()->getFilters();
         $this->assertEquals(1, count($filters));
     }
+
+    public function test_register_route_using_any_method() {
+        $router = new Router();
+        $this->assertNull($router->match(HttpRequestMethod::GET, new Url('/foo')));
+        $this->assertNull($router->match(HttpRequestMethod::POST, new Url('/foo')));
+        $this->assertNull($router->match(HttpRequestMethod::PUT, new Url('/foo')));
+        $this->assertNull($router->match(HttpRequestMethod::PATCH, new Url('/foo')));
+        $this->assertNull($router->match(HttpRequestMethod::UPDATE, new Url('/foo')));
+        $this->assertNull($router->match(HttpRequestMethod::DELETE, new Url('/foo')));
+        $router->any('/foo', 'method');
+
+        $route = $router->match(HttpRequestMethod::GET, new Url('/foo'));
+        $this->assertTrue($route instanceof IRoute);
+        $this->assertEquals($route, $router->match(HttpRequestMethod::POST, new Url('/foo')));
+        $this->assertEquals($route, $router->match(HttpRequestMethod::PUT, new Url('/foo')));
+        $this->assertEquals($route, $router->match(HttpRequestMethod::PATCH, new Url('/foo')));
+        $this->assertEquals($route, $router->match(HttpRequestMethod::UPDATE, new Url('/foo')));
+        $this->assertEquals($route, $router->match(HttpRequestMethod::DELETE, new Url('/foo')));
+    }
 }

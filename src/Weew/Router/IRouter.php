@@ -70,6 +70,14 @@ interface IRouter {
     function head($path, $abstract);
 
     /**
+     * @param $path
+     * @param $abstract
+     *
+     * @return IRouter
+     */
+    function any($path, $abstract);
+
+    /**
      * @param $method
      * @param $path
      * @param $abstract
