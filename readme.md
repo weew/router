@@ -1,10 +1,10 @@
 # Simple router
 
-[![Build Status](https://img.shields.io/travis/weew/php-router.svg)](https://travis-ci.org/weew/php-router)
-[![Code Quality](https://img.shields.io/scrutinizer/g/weew/php-router.svg)](https://scrutinizer-ci.com/g/weew/php-router)
-[![Test Coverage](https://img.shields.io/coveralls/weew/php-router.svg)](https://coveralls.io/github/weew/php-router)
-[![Version](https://img.shields.io/packagist/v/weew/php-router.svg)](https://packagist.org/packages/weew/php-router)
-[![Licence](https://img.shields.io/packagist/l/weew/php-router.svg)](https://packagist.org/packages/weew/php-router)
+[![Build Status](https://img.shields.io/travis/weew/router.svg)](https://travis-ci.org/weew/router)
+[![Code Quality](https://img.shields.io/scrutinizer/g/weew/router.svg)](https://scrutinizer-ci.com/g/weew/router)
+[![Test Coverage](https://img.shields.io/coveralls/weew/router.svg)](https://coveralls.io/github/weew/router)
+[![Version](https://img.shields.io/packagist/v/weew/router.svg)](https://packagist.org/packages/weew/router)
+[![Licence](https://img.shields.io/packagist/l/weew/router.svg)](https://packagist.org/packages/weew/router)
 
 ## Table of contents
 
@@ -23,7 +23,7 @@
 
 ## Installation
 
-`composer require weew/php-router`
+`composer require weew/router`
 
 ## Introduction
 
@@ -285,7 +285,7 @@ if ($route instanceof IRoute) {
 
 There are several extensions available:
 
-- [weew/php-router-container-aware](https://github.com/weew/php-router-container-aware)
-- [weew/php-router-entities-resolver](https://github.com/weew/php-router-entities-resolver)
-- [weew/php-router-routes-invoker-container-aware](https://github.com/weew/php-router-routes-invoker-container-aware)
-- [weew/php-router-configurator](https://github.com/weew/php-router-configurator)
+- [weew/router-container-aware](https://github.com/weew/router-container-aware)
+- [weew/router-entities-resolver](https://github.com/weew/router-entities-resolver)
+- [weew/router-routes-invoker-container-aware](https://github.com/weew/router-routes-invoker-container-aware)
+- [weew/router-configurator](https://github.com/weew/router-configurator)

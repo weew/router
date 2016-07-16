@@ -10,7 +10,7 @@
          syntaxCheck="false"
          bootstrap="tests/bootstrap.php">
     <testsuites>
-        <testsuite name="php-router">
+        <testsuite name="router">
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
