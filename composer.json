@@ -14,10 +14,10 @@
         }
     },
     "require": {
-        "weew/http": "^1.0.0",
+        "weew/http": "^1.11",
         "weew/helpers-array": "^1.0.0",
         "weew/helpers-string": "^1.0.0",
-        "weew/url": "^1.0.0",
+        "weew/url": "^2.0",
         "weew/contracts": "^1.1",
         "weew/url-matcher": "^1.0"
     },
